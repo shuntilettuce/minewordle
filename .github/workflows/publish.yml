@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        branch: ['main', 'mc/1.21.1']
+        branch: ['main', 'mc/1.21.4', 'mc/1.21.1', 'mc/1.20.4']
 
     steps:
       - uses: actions/checkout@v4
