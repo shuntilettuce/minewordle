@@ -7,12 +7,20 @@ on:
       - 'v*'
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        branch: ['main', 'mc/1.21.4', 'mc/1.21.1', 'mc/1.20.4']
+        include:
+          - branch: main
+            mc_version: 1.21.11
+          - branch: mc/1.21.4
+            mc_version: 1.21.4
+          - branch: mc/1.21.1
+            mc_version: 1.21.1
+          - branch: mc/1.20.4
+            mc_version: 1.20.4
 
     steps:
       - uses: actions/checkout@v4
@@ -23,11 +31,60 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: gradle
 
-      - name: Grant execute permission
-        run: chmod +x gradlew
+      - name: Build
+        run: chmod +x gradlew && ./gradlew remapJar
 
-      - name: Publish
-        run: ./gradlew modrinth
+      - name: Prepare JAR
+        run: |
+          MOD_VERSION=$(grep '^mod_version=' gradle.properties | cut -d= -f2)
+          cp build/libs/minewordle-${MOD_VERSION}.jar minewordle-${{ matrix.mc_version }}.jar
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jar-${{ matrix.mc_version }}
+          path: minewordle-${{ matrix.mc_version }}.jar
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: jar-*
+          merge-multiple: true
+          path: jars/
+
+      - name: Get mod version
+        run: echo "MOD_VERSION=$(grep '^mod_version=' gradle.properties | cut -d= -f2)" >> $GITHUB_ENV
+
+      - name: Publish to Modrinth
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+        run: |
+          cat > data.json << 'EOF'
+          {
+            "name": "MineWordle VERSION_PLACEHOLDER",
+            "version_number": "VERSION_PLACEHOLDER",
+            "project_id": "minewordle",
+            "version_type": "release",
+            "game_versions": ["1.21.11", "1.21.4", "1.21.1", "1.20.4"],
+            "loaders": ["fabric"],
+            "file_parts": ["file-0", "file-1", "file-2", "file-3"],
+            "primary_file": "file-0",
+            "dependencies": [{"project_id": "P7dR8mSH", "dependency_type": "required"}],
+            "changelog": ""
+          }
+          EOF
+          sed -i "s/VERSION_PLACEHOLDER/$MOD_VERSION/g" data.json
+
+          curl -sf -X POST "https://api.modrinth.com/v2/version" \
+            -H "Authorization: $MODRINTH_TOKEN" \
+            -F "data=@data.json;type=application/json" \
+            -F "file-0=@jars/minewordle-1.21.11.jar;type=application/java-archive" \
+            -F "file-1=@jars/minewordle-1.21.4.jar;type=application/java-archive" \
+            -F "file-2=@jars/minewordle-1.21.1.jar;type=application/java-archive" \
+            -F "file-3=@jars/minewordle-1.20.4.jar;type=application/java-archive"
