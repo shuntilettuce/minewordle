@@ -3,11 +3,8 @@ package com.minewordle;
 import com.minewordle.WordleGame.GameState;
 import com.minewordle.WordleGame.TileState;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
@@ -139,7 +136,7 @@ public class WordleScreen extends Screen {
 
     private void playClick(float pitch) {
         MinecraftClient.getInstance().getSoundManager().play(
-            PositionedSoundInstance.ui(SoundEvents.UI_BUTTON_CLICK, pitch)
+            PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, pitch)
         );
     }
 
@@ -150,7 +147,7 @@ public class WordleScreen extends Screen {
                 ? SoundEvents.ENTITY_PLAYER_LEVELUP
                 : SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP;
         MinecraftClient.getInstance().getSoundManager().play(
-            PositionedSoundInstance.ui(sound, 1.0f)
+            PositionedSoundInstance.master(sound, 1.0f)
         );
     }
 
@@ -386,18 +383,17 @@ public class WordleScreen extends Screen {
     // ── 入力 ─────────────────────────────────────────────────────────────────
 
     @Override
-    public boolean keyPressed(KeyInput key) {
-        if (key.key() == GLFW.GLFW_KEY_ESCAPE) { this.close(); return true; }
-        if (game.getGameState() != GameState.PLAYING) return super.keyPressed(key);
-        if (key.key() == GLFW.GLFW_KEY_BACKSPACE) { game.removeLetter(); playClick(0.9f); return true; }
-        if (key.key() == GLFW.GLFW_KEY_ENTER)     { handleSubmit(); return true; }
-        return super.keyPressed(key);
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) { this.close(); return true; }
+        if (game.getGameState() != GameState.PLAYING) return super.keyPressed(keyCode, scanCode, modifiers);
+        if (keyCode == GLFW.GLFW_KEY_BACKSPACE) { game.removeLetter(); playClick(0.9f); return true; }
+        if (keyCode == GLFW.GLFW_KEY_ENTER)     { handleSubmit(); return true; }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
+    public boolean charTyped(char chr, int modifiers) {
         if (game.getGameState() != GameState.PLAYING) return false;
-        char chr = (char) input.codepoint();
         if (Character.isLetter(chr)) {
             game.addLetter(chr);
             playClick(0.9f + (float) Math.random() * 0.2f);
@@ -423,21 +419,21 @@ public class WordleScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean isDouble) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         GameState state = game.getGameState();
-        if ((state == GameState.WON || state == GameState.LOST) && click.button() == 0) {
-            if (click.x() >= copyBtnX && click.x() <= copyBtnX + copyBtnW
-                    && click.y() >= copyBtnY && click.y() <= copyBtnY + copyBtnH) {
+        if ((state == GameState.WON || state == GameState.LOST) && button == 0) {
+            if (mouseX >= copyBtnX && mouseX <= copyBtnX + copyBtnW
+                    && mouseY >= copyBtnY && mouseY <= copyBtnY + copyBtnH) {
                 copyShare();
                 return true;
             }
-            if (click.x() >= chatBtnX && click.x() <= chatBtnX + chatBtnW
-                    && click.y() >= chatBtnY && click.y() <= chatBtnY + chatBtnH) {
+            if (mouseX >= chatBtnX && mouseX <= chatBtnX + chatBtnW
+                    && mouseY >= chatBtnY && mouseY <= chatBtnY + chatBtnH) {
                 sendToChat();
                 return true;
             }
         }
-        return super.mouseClicked(click, isDouble);
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
