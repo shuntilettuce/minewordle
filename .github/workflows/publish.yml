@@ -3,11 +3,14 @@ name: Publish to Modrinth
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
 
 jobs:
   build:
+    if: github.event_name != 'push' || github.ref_type == 'tag' || contains(github.event.head_commit.message, '[republish]')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -86,6 +89,7 @@ jobs:
             "version_number": "VERSION_PLACEHOLDER",
             "project_id": "minewordle",
             "version_type": "release",
+            "featured": true,
             "game_versions": ["1.21.11", "1.21.4", "1.21.1", "1.20.4"],
             "loaders": ["fabric"],
             "client_side": "required",
@@ -97,8 +101,6 @@ jobs:
           }
           EOF
           sed -i "s/VERSION_PLACEHOLDER/$MOD_VERSION/g" data.json
-          echo "Submitting data.json:"
-          cat data.json
 
           RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "https://api.modrinth.com/v2/version" \
             -H "Authorization: $MODRINTH_TOKEN" \
