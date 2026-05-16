@@ -3,18 +3,19 @@ name: Publish to Modrinth
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
 
 jobs:
   build:
+    if: github.event_name != 'push' || github.ref_type == 'tag' || contains(github.event.head_commit.message, '[republish]')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          - branch: main
-            mc_version: 1.21.11
           - branch: mc/1.21.4
             mc_version: 1.21.4
           - branch: mc/1.21.1
@@ -88,7 +89,7 @@ jobs:
             "loaders": ["fabric"],
             "client_side": "required",
             "server_side": "unsupported",
-            "file_parts": ["file-0", "file-1", "file-2", "file-3"],
+            "file_parts": ["file-0", "file-1", "file-2"],
             "primary_file": "file-0",
             "dependencies": [{"project_id": "P7dR8mSH", "dependency_type": "required"}],
             "changelog": ""
@@ -99,10 +100,9 @@ jobs:
           RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "https://api.modrinth.com/v2/version" \
             -H "Authorization: $MODRINTH_TOKEN" \
             -F "data=@data.json;type=application/json" \
-            -F "file-0=@jars/minewordle-1.21.11.jar;type=application/java-archive" \
-            -F "file-1=@jars/minewordle-1.21.4.jar;type=application/java-archive" \
-            -F "file-2=@jars/minewordle-1.21.1.jar;type=application/java-archive" \
-            -F "file-3=@jars/minewordle-1.20.4.jar;type=application/java-archive")
+            -F "file-0=@jars/minewordle-1.21.4.jar;type=application/java-archive" \
+            -F "file-1=@jars/minewordle-1.21.1.jar;type=application/java-archive" \
+            -F "file-2=@jars/minewordle-1.20.4.jar;type=application/java-archive")
 
           HTTP_STATUS=$(echo "$RESPONSE" | grep 'HTTP_STATUS:' | cut -d: -f2)
           BODY=$(echo "$RESPONSE" | grep -v 'HTTP_STATUS:')
