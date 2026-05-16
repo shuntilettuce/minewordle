@@ -69,7 +69,7 @@ jobs:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
         run: |
           echo "Fetching existing versions for $MOD_VERSION..."
-          VERSIONS_JSON=$(curl -s "https://api.modrinth.com/v2/project/minewordle/version" \
+          VERSIONS_JSON=$(curl -s "https://api.modrinth.com/v2/project/r45R0pFr/version" \
             -H "Authorization: $MODRINTH_TOKEN")
           echo "Versions response: $VERSIONS_JSON"
           for VERSION_ID in $(echo "$VERSIONS_JSON" | jq -r --arg ver "$MOD_VERSION" '.[] | select(.version_number == $ver) | .id'); do
@@ -87,7 +87,7 @@ jobs:
           {
             "name": "MineWordle VERSION_PLACEHOLDER",
             "version_number": "VERSION_PLACEHOLDER",
-            "project_id": "minewordle",
+            "project_id": "r45R0pFr",
             "version_type": "release",
             "featured": true,
             "game_versions": ["1.21.11", "1.21.4", "1.21.1", "1.20.4"],
