@@ -3,11 +3,14 @@ name: Publish to Modrinth
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
 
 jobs:
   build:
+    if: github.event_name != 'push' || github.ref_type == 'tag' || contains(github.event.head_commit.message, '[republish]')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -61,6 +64,18 @@ jobs:
       - name: Get mod version
         run: echo "MOD_VERSION=$(grep '^mod_version=' gradle.properties | cut -d= -f2)" >> $GITHUB_ENV
 
+      - name: Delete existing Modrinth versions
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+        run: |
+          VERSIONS_JSON=$(curl -s "https://api.modrinth.com/v2/project/minewordle/version" \
+            -H "Authorization: $MODRINTH_TOKEN")
+          for VERSION_ID in $(echo "$VERSIONS_JSON" | jq -r --arg ver "$MOD_VERSION" '.[] | select(.version_number == $ver) | .id'); do
+            echo "Deleting version $VERSION_ID ($MOD_VERSION)"
+            curl -sf -X DELETE "https://api.modrinth.com/v2/version/$VERSION_ID" \
+              -H "Authorization: $MODRINTH_TOKEN"
+          done
+
       - name: Publish to Modrinth
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
@@ -73,6 +88,8 @@ jobs:
             "version_type": "release",
             "game_versions": ["1.21.11", "1.21.4", "1.21.1", "1.20.4"],
             "loaders": ["fabric"],
+            "client_side": "required",
+            "server_side": "unsupported",
             "file_parts": ["file-0", "file-1", "file-2", "file-3"],
             "primary_file": "file-0",
             "dependencies": [{"project_id": "P7dR8mSH", "dependency_type": "required"}],
