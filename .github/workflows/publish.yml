@@ -3,14 +3,11 @@ name: Publish to Modrinth
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
     tags:
       - 'v*'
 
 jobs:
   build:
-    if: github.event_name != 'push' || github.ref_type == 'tag' || contains(github.event.head_commit.message, '[republish]')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -68,15 +65,12 @@ jobs:
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
         run: |
-          echo "Fetching existing versions for $MOD_VERSION..."
           VERSIONS_JSON=$(curl -s "https://api.modrinth.com/v2/project/r45R0pFr/version" \
             -H "Authorization: $MODRINTH_TOKEN")
-          echo "Versions response: $VERSIONS_JSON"
           for VERSION_ID in $(echo "$VERSIONS_JSON" | jq -r --arg ver "$MOD_VERSION" '.[] | select(.version_number == $ver) | .id'); do
             echo "Deleting version $VERSION_ID ($MOD_VERSION)"
             curl -s -X DELETE "https://api.modrinth.com/v2/version/$VERSION_ID" \
               -H "Authorization: $MODRINTH_TOKEN"
-            echo "Deleted."
           done
 
       - name: Publish to Modrinth
