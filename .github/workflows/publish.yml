@@ -3,11 +3,14 @@ name: Publish to Modrinth
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
 
 jobs:
   build:
+    if: github.event_name != 'push' || github.ref_type == 'tag' || contains(github.event.head_commit.message, '[republish]')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -59,14 +62,14 @@ jobs:
       - name: Get mod version
         run: echo "MOD_VERSION=$(grep '^mod_version=' gradle.properties | cut -d= -f2)" >> $GITHUB_ENV
 
-      - name: Delete existing Modrinth versions
+      - name: Delete existing matching Modrinth versions
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
         run: |
           VERSIONS_JSON=$(curl -s "https://api.modrinth.com/v2/project/r45R0pFr/version" \
             -H "Authorization: $MODRINTH_TOKEN")
-          for VERSION_ID in $(echo "$VERSIONS_JSON" | jq -r --arg ver "$MOD_VERSION" '.[] | select(.version_number == $ver) | .id'); do
-            echo "Deleting version $VERSION_ID ($MOD_VERSION)"
+          for VERSION_ID in $(echo "$VERSIONS_JSON" | jq -r --arg ver "$MOD_VERSION" '.[] | select(.version_number == $ver or (.version_number | startswith($ver + "+"))) | .id'); do
+            echo "Deleting existing version $VERSION_ID"
             curl -s -X DELETE "https://api.modrinth.com/v2/version/$VERSION_ID" \
               -H "Authorization: $MODRINTH_TOKEN"
           done
@@ -75,28 +78,49 @@ jobs:
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
         run: |
-          cat > data.json << 'EOF'
-          {
-            "name": "MineWordle VERSION_PLACEHOLDER",
-            "version_number": "VERSION_PLACEHOLDER",
-            "project_id": "r45R0pFr",
-            "version_type": "release",
-            "featured": true,
-            "game_versions": ["1.21.11", "1.21.4", "1.21.1", "1.20.4"],
-            "loaders": ["fabric"],
-            "client_side": "required",
-            "server_side": "unsupported",
-            "file_parts": ["file-0", "file-1", "file-2"],
-            "primary_file": "file-0",
-            "dependencies": [{"project_id": "P7dR8mSH", "dependency_type": "required"}],
-            "changelog": ""
-          }
-          EOF
-          sed -i "s/VERSION_PLACEHOLDER/$MOD_VERSION/g" data.json
+          publish_one() {
+            local mc_version="$1"
+            local game_versions_json="$2"
+            local jar_file="jars/minewordle-${mc_version}.jar"
+            local upload_name="minewordle-${MOD_VERSION}+${mc_version}.jar"
+            local version_number="${MOD_VERSION}+${mc_version}"
 
-          curl -sf -X POST "https://api.modrinth.com/v2/version" \
-            -H "Authorization: $MODRINTH_TOKEN" \
-            -F "data=@data.json;type=application/json" \
-            -F "file-0=@jars/minewordle-1.21.4.jar;type=application/java-archive" \
-            -F "file-1=@jars/minewordle-1.21.1.jar;type=application/java-archive" \
-            -F "file-2=@jars/minewordle-1.20.4.jar;type=application/java-archive"
+            jq -n \
+              --arg name "MineWordle ${MOD_VERSION}" \
+              --arg version_number "$version_number" \
+              --argjson game_versions "$game_versions_json" \
+              '{
+                name: $name,
+                version_number: $version_number,
+                project_id: "r45R0pFr",
+                version_type: "release",
+                featured: true,
+                game_versions: $game_versions,
+                loaders: ["fabric"],
+                client_side: "required",
+                server_side: "unsupported",
+                file_parts: ["file-0"],
+                primary_file: "file-0",
+                dependencies: [{project_id: "P7dR8mSH", dependency_type: "required"}],
+                changelog: ""
+              }' > data.json
+
+            echo "Uploading ${version_number}..."
+            RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "https://api.modrinth.com/v2/version" \
+              -H "Authorization: $MODRINTH_TOKEN" \
+              -F "data=@data.json;type=application/json" \
+              -F "file-0=@${jar_file};filename=${upload_name};type=application/java-archive")
+
+            HTTP_STATUS=$(echo "$RESPONSE" | grep 'HTTP_STATUS:' | cut -d: -f2)
+            BODY=$(echo "$RESPONSE" | grep -v 'HTTP_STATUS:')
+            echo "[${version_number}] HTTP $HTTP_STATUS: $BODY"
+
+            if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+              echo "ERROR: Modrinth API returned $HTTP_STATUS for ${version_number}"
+              exit 1
+            fi
+          }
+
+          publish_one "1.21.4" '["1.21.11", "1.21.4"]'
+          publish_one "1.21.1" '["1.21.1"]'
+          publish_one "1.20.4" '["1.20.4"]'
