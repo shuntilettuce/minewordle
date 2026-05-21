@@ -142,7 +142,7 @@ jobs:
             -X PATCH "https://api.modrinth.com/v2/project/r45R0pFr" \
             -H "Authorization: $MODRINTH_TOKEN" \
             -H "Content-Type: application/json" \
-            -d '{"client_side": "required", "server_side": "unsupported"}')
+            -d '{"client_side": "required", "server_side": "unsupported", "requested_status": "listed"}')
           PROJ_STATUS=$(echo "$PROJ_RESP" | grep 'HTTP_STATUS:' | cut -d: -f2)
           PROJ_BODY=$(echo "$PROJ_RESP" | grep -v 'HTTP_STATUS:')
           echo "[project] HTTP $PROJ_STATUS: $PROJ_BODY"
