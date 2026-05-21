@@ -116,8 +116,31 @@ jobs:
               echo "ERROR: Modrinth API returned $HTTP_STATUS for ${version_number}"
               exit 1
             fi
+
+            VERSION_ID=$(echo "$BODY" | jq -r '.id // empty')
+            if [ -n "$VERSION_ID" ]; then
+              echo "Setting environment via v3 API for version $VERSION_ID..."
+              ENV_RESP=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
+                -X PATCH "https://api.modrinth.com/v3/version/$VERSION_ID" \
+                -H "Authorization: $MODRINTH_TOKEN" \
+                -H "Content-Type: application/json" \
+                -d '{"environment": "client_only"}')
+              ENV_STATUS=$(echo "$ENV_RESP" | grep 'HTTP_STATUS:' | cut -d: -f2)
+              ENV_BODY=$(echo "$ENV_RESP" | grep -v 'HTTP_STATUS:')
+              echo "[env v3] HTTP $ENV_STATUS: $ENV_BODY"
+            fi
           }
 
           publish_one "1.21.4" '["1.21.11", "1.21.4"]'
           publish_one "1.21.1" '["1.21.1"]'
           publish_one "1.20.4" '["1.20.4"]'
+
+          echo "Updating project-level environment metadata..."
+          PROJ_RESP=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
+            -X PATCH "https://api.modrinth.com/v2/project/r45R0pFr" \
+            -H "Authorization: $MODRINTH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"client_side": "required", "server_side": "unsupported"}')
+          PROJ_STATUS=$(echo "$PROJ_RESP" | grep 'HTTP_STATUS:' | cut -d: -f2)
+          PROJ_BODY=$(echo "$PROJ_RESP" | grep -v 'HTTP_STATUS:')
+          echo "[project] HTTP $PROJ_STATUS: $PROJ_BODY"
