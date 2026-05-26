@@ -15,6 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - branch: mc/1.21.11
+            mc_version: 1.21.11
           - branch: mc/1.21.4
             mc_version: 1.21.4
           - branch: mc/1.21.1
@@ -133,7 +135,8 @@ jobs:
             fi
           }
 
-          publish_one "1.21.4" '["1.21.11", "1.21.4"]'
+          publish_one "1.21.11" '["1.21.11"]'
+          publish_one "1.21.4" '["1.21.4"]'
           publish_one "1.21.1" '["1.21.1"]'
           publish_one "1.20.4" '["1.20.4"]'
 
