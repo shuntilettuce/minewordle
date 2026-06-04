@@ -53,6 +53,12 @@ jobs:
             mc_version: 1.21.10
           - branch: mc/1.21.11
             mc_version: 1.21.11
+          - branch: mc/26.1
+            mc_version: 26.1
+          - branch: mc/26.1.1
+            mc_version: 26.1.1
+          - branch: mc/26.1.2
+            mc_version: 26.1.2
 
     steps:
       - uses: actions/checkout@v4
@@ -181,6 +187,9 @@ jobs:
           publish_one "1.21.9"
           publish_one "1.21.10"
           publish_one "1.21.11"
+          publish_one "26.1"
+          publish_one "26.1.1"
+          publish_one "26.1.2"
 
           echo "Updating project-level environment metadata..."
           PROJ_RESP=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
