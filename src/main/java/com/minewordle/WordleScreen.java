@@ -199,7 +199,7 @@ public class WordleScreen extends Screen {
 
     @Override
     public void render(DrawContext ctx, int mx, int my, float delta) {
-        this.renderInGameBackground(ctx);
+        ctx.fill(0, 0, this.width, this.height, 0xC0000000);
 
         int pw        = panelWidth();
         int panelLeft = (this.width - pw) / 2;
