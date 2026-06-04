@@ -55,10 +55,13 @@ jobs:
             mc_version: 1.21.11
           - branch: mc/26.1
             mc_version: 26.1
+            java: '25'
           - branch: mc/26.1.1
             mc_version: 26.1.1
+            java: '25'
           - branch: mc/26.1.2
             mc_version: 26.1.2
+            java: '25'
 
     steps:
       - uses: actions/checkout@v4
@@ -67,7 +70,7 @@ jobs:
 
       - uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: ${{ matrix.java || '21' }}
           distribution: 'temurin'
           cache: gradle
 
