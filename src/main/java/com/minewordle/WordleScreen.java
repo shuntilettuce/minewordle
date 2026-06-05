@@ -141,7 +141,7 @@ public class WordleScreen extends Screen {
 
     private void playClick(float pitch) {
         MinecraftClient.getInstance().getSoundManager().play(
-            PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, pitch)
+            PositionedSoundInstance.master((RegistryEntry<SoundEvent>) SoundEvents.UI_BUTTON_CLICK, pitch)
         );
     }
 
@@ -152,7 +152,7 @@ public class WordleScreen extends Screen {
                 ? SoundEvents.ENTITY_PLAYER_LEVELUP
                 : SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP;
         MinecraftClient.getInstance().getSoundManager().play(
-            PositionedSoundInstance.master(RegistryEntry.of(sound), 1.0f)
+            PositionedSoundInstance.master((RegistryEntry<SoundEvent>) sound, 1.0f)
         );
     }
 
