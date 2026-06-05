@@ -7,7 +7,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.resources.sounds.PositionedSoundInstance;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import org.lwjgl.glfw.GLFW;
@@ -137,36 +137,35 @@ public class WordleScreen extends Screen {
     }
 
     private void playClick(float pitch) {
-        Minecraft.getInstance().getSoundManager().play(
-            PositionedSoundInstance.ui(SoundEvents.UI_BUTTON_CLICK, pitch)
+        this.minecraft.getSoundManager().play(
+            SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, pitch)
         );
     }
 
     private void playWinSound(int guesses) {
         if (guesses <= 2) {
-            Minecraft.getInstance().getSoundManager().play(
-                PositionedSoundInstance.ui(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0f));
+            this.minecraft.getSoundManager().play(
+                SimpleSoundInstance.forUI(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0f));
         } else if (guesses <= 4) {
-            Minecraft.getInstance().getSoundManager().play(
-                PositionedSoundInstance.ui(SoundEvents.ENTITY_PLAYER_LEVELUP, 1.0f));
+            this.minecraft.getSoundManager().play(
+                SimpleSoundInstance.forUI(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 0.9f));
         } else {
-            Minecraft.getInstance().getSoundManager().play(
-                PositionedSoundInstance.ui(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f));
+            this.minecraft.getSoundManager().play(
+                SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.1f));
         }
     }
 
     // ── シェア機能 ────────────────────────────────────────────────────────────
 
     private void copyShare() {
-        Minecraft.getInstance().keyboardHandler.setClipboard(buildShareText());
+        this.minecraft.keyboardHandler.setClipboard(buildShareText());
         flash("Copied!");
     }
 
     private void sendToChat() {
-        Minecraft client = Minecraft.getInstance();
-        if (client.player == null) { flash("Not in a world!"); return; }
+        if (this.minecraft.player == null) { flash("Not in a world!"); return; }
         String header = buildShareText().split("\n")[0];
-        client.player.connection.sendChat(header);
+        this.minecraft.player.connection.sendChat(header);
         flash("Sent to chat!");
     }
 
@@ -389,18 +388,12 @@ public class WordleScreen extends Screen {
         if (game.getGameState() != GameState.PLAYING) return super.keyPressed(event);
         if (event.key() == GLFW.GLFW_KEY_BACKSPACE) { game.removeLetter(); playClick(0.9f); return true; }
         if (event.key() == GLFW.GLFW_KEY_ENTER)     { handleSubmit(); return true; }
-        return super.keyPressed(event);
-    }
-
-    @Override
-    public boolean charTyped(char chr, int modifiers) {
-        if (game.getGameState() != GameState.PLAYING) return false;
-        if (Character.isLetter(chr)) {
-            game.addLetter(chr);
+        if (event.key() >= GLFW.GLFW_KEY_A && event.key() <= GLFW.GLFW_KEY_Z) {
+            game.addLetter((char) event.key());
             playClick(0.9f + (float) Math.random() * 0.2f);
             return true;
         }
-        return false;
+        return super.keyPressed(event);
     }
 
     private void handleSubmit() {
