@@ -141,7 +141,7 @@ public class WordleScreen extends Screen {
 
     private void playClick(float pitch) {
         MinecraftClient.getInstance().getSoundManager().play(
-            PositionedSoundInstance.master(RegistryEntry.of(SoundEvents.UI_BUTTON_CLICK), pitch)
+            PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, pitch)
         );
     }
 
