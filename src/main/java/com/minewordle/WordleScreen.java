@@ -9,6 +9,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.input.CharInput;
 import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
@@ -139,18 +141,18 @@ public class WordleScreen extends Screen {
 
     private void playClick(float pitch) {
         MinecraftClient.getInstance().getSoundManager().play(
-            PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), pitch)
+            PositionedSoundInstance.master(RegistryEntry.of(SoundEvents.UI_BUTTON_CLICK), pitch)
         );
     }
 
     private void playWinSound(int guesses) {
-        var sound = guesses <= 2
-            ? SoundEvents.UI_TOAST_CHALLENGE_COMPLETE.value()
+        SoundEvent sound = guesses <= 2
+            ? SoundEvents.UI_TOAST_CHALLENGE_COMPLETE
             : guesses <= 4
-                ? SoundEvents.ENTITY_PLAYER_LEVELUP.value()
-                : SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP.value();
+                ? SoundEvents.ENTITY_PLAYER_LEVELUP
+                : SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP;
         MinecraftClient.getInstance().getSoundManager().play(
-            PositionedSoundInstance.master(sound, 1.0f)
+            PositionedSoundInstance.master(RegistryEntry.of(sound), 1.0f)
         );
     }
 
