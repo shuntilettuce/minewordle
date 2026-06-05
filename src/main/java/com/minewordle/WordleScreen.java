@@ -3,8 +3,11 @@ package com.minewordle;
 import com.minewordle.WordleGame.GameState;
 import com.minewordle.WordleGame.TileState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
@@ -136,16 +139,16 @@ public class WordleScreen extends Screen {
 
     private void playClick(float pitch) {
         MinecraftClient.getInstance().getSoundManager().play(
-            PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, pitch)
+            PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), pitch)
         );
     }
 
     private void playWinSound(int guesses) {
         var sound = guesses <= 2
-            ? SoundEvents.UI_TOAST_CHALLENGE_COMPLETE
+            ? SoundEvents.UI_TOAST_CHALLENGE_COMPLETE.value()
             : guesses <= 4
-                ? SoundEvents.ENTITY_PLAYER_LEVELUP
-                : SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP;
+                ? SoundEvents.ENTITY_PLAYER_LEVELUP.value()
+                : SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP.value();
         MinecraftClient.getInstance().getSoundManager().play(
             PositionedSoundInstance.master(sound, 1.0f)
         );
@@ -383,19 +386,19 @@ public class WordleScreen extends Screen {
     // ── 入力 ─────────────────────────────────────────────────────────────────
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) { this.close(); return true; }
-        if (game.getGameState() != GameState.PLAYING) return super.keyPressed(keyCode, scanCode, modifiers);
-        if (keyCode == GLFW.GLFW_KEY_BACKSPACE) { game.removeLetter(); playClick(0.9f); return true; }
-        if (keyCode == GLFW.GLFW_KEY_ENTER)     { handleSubmit(); return true; }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+    public boolean keyPressed(KeyInput input) {
+        if (input.key() == GLFW.GLFW_KEY_ESCAPE) { this.close(); return true; }
+        if (game.getGameState() != GameState.PLAYING) return super.keyPressed(input);
+        if (input.key() == GLFW.GLFW_KEY_BACKSPACE) { game.removeLetter(); playClick(0.9f); return true; }
+        if (input.key() == GLFW.GLFW_KEY_ENTER)     { handleSubmit(); return true; }
+        return super.keyPressed(input);
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
+    public boolean charTyped(CharInput input) {
         if (game.getGameState() != GameState.PLAYING) return false;
-        if (Character.isLetter(chr)) {
-            game.addLetter(chr);
+        if (input.isValidChar() && Character.isLetter(input.codepoint())) {
+            game.addLetter((char) input.codepoint());
             playClick(0.9f + (float) Math.random() * 0.2f);
             return true;
         }
@@ -419,21 +422,21 @@ public class WordleScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         GameState state = game.getGameState();
-        if ((state == GameState.WON || state == GameState.LOST) && button == 0) {
-            if (mouseX >= copyBtnX && mouseX <= copyBtnX + copyBtnW
-                    && mouseY >= copyBtnY && mouseY <= copyBtnY + copyBtnH) {
+        if ((state == GameState.WON || state == GameState.LOST) && click.button() == 0) {
+            if (click.x() >= copyBtnX && click.x() <= copyBtnX + copyBtnW
+                    && click.y() >= copyBtnY && click.y() <= copyBtnY + copyBtnH) {
                 copyShare();
                 return true;
             }
-            if (mouseX >= chatBtnX && mouseX <= chatBtnX + chatBtnW
-                    && mouseY >= chatBtnY && mouseY <= chatBtnY + chatBtnH) {
+            if (click.x() >= chatBtnX && click.x() <= chatBtnX + chatBtnW
+                    && click.y() >= chatBtnY && click.y() <= chatBtnY + chatBtnH) {
                 sendToChat();
                 return true;
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     @Override
