@@ -56,12 +56,15 @@ jobs:
           - branch: mc/26.1
             mc_version: 26.1
             java: '25'
+            build_task: jar
           - branch: mc/26.1.1
             mc_version: 26.1.1
             java: '25'
+            build_task: jar
           - branch: mc/26.1.2
             mc_version: 26.1.2
             java: '25'
+            build_task: jar
 
     steps:
       - uses: actions/checkout@v4
@@ -75,7 +78,7 @@ jobs:
           cache: gradle
 
       - name: Build
-        run: chmod +x gradlew && ./gradlew remapJar
+        run: chmod +x gradlew && ./gradlew ${{ matrix.build_task || 'remapJar' }}
 
       - name: Prepare JAR
         run: |
