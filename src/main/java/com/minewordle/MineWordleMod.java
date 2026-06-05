@@ -1,8 +1,8 @@
 package com.minewordle;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.minecraft.client.Minecraft;
 
 public class MineWordleMod implements ClientModInitializer {
@@ -10,9 +10,9 @@ public class MineWordleMod implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
-            dispatcher.register(ClientCommandManager.literal("wordle")
+            dispatcher.register(ClientCommands.literal("wordle")
                 .executes(ctx -> openScreen(ctx.getSource().getClient(), false))
-                .then(ClientCommandManager.literal("practice")
+                .then(ClientCommands.literal("practice")
                     .executes(ctx -> openScreen(ctx.getSource().getClient(), true)))
             )
         );
