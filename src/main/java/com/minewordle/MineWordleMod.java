@@ -3,7 +3,7 @@ package com.minewordle;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 public class MineWordleMod implements ClientModInitializer {
 
@@ -18,9 +18,9 @@ public class MineWordleMod implements ClientModInitializer {
         );
     }
 
-    private static int openScreen(MinecraftClient client, boolean practiceMode) {
+    private static int openScreen(Minecraft client, boolean practiceMode) {
         client.execute(() -> {
-            if (client.currentScreen == null) {
+            if (client.screen == null) {
                 client.setScreen(new WordleScreen(practiceMode));
             }
         });
