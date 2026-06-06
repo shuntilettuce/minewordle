@@ -7,6 +7,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import java.time.LocalDate;
@@ -51,7 +52,7 @@ public class WordleScreen extends Screen {
     private int chatBtnX, chatBtnY, chatBtnW, chatBtnH;
 
     public WordleScreen(boolean practiceMode) {
-        super(Text.literal("MineWordle"));
+        super(new LiteralText("MineWordle"));
         this.practiceMode = practiceMode;
 
         if (practiceMode) {
@@ -155,7 +156,7 @@ public class WordleScreen extends Screen {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) { flash("Not in a world!"); return; }
         String header = buildShareText().split("\n")[0];
-        client.player.networkHandler.sendChatMessage(header);
+        client.player.sendChatMessage(header);
         flash("Sent to chat!");
     }
 
@@ -198,12 +199,12 @@ public class WordleScreen extends Screen {
         int panelBot  = keyboardTop() + 3 * (KEY_H + KEY_GAP) - KEY_GAP + 10;
         fill(matrices, panelLeft, panelTop, panelLeft + pw, panelBot, C_PANEL_BG);
 
-        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal("MINEWORDLE"), this.width / 2, panelTop + 4, C_WHITE);
+        drawCenteredTextWithShadow(matrices, textRenderer, new LiteralText("MINEWORDLE"), this.width / 2, panelTop + 4, C_WHITE);
         fill(matrices, this.width / 2 - 80, panelTop + 14, this.width / 2 + 80, panelTop + 15, C_BORDER);
 
         if (practiceMode) {
             drawCenteredTextWithShadow(matrices, textRenderer,
-                Text.literal("- PRACTICE -"), this.width / 2, panelTop + 17, C_PRACTICE);
+                new LiteralText("- PRACTICE -"), this.width / 2, panelTop + 17, C_PRACTICE);
         }
 
         renderLoadingStatus(matrices);
@@ -218,7 +219,7 @@ public class WordleScreen extends Screen {
     private void renderLoadingStatus(MatrixStack matrices) {
         if (game.getGameState() == GameState.ERROR) {
             drawCenteredTextWithShadow(matrices, textRenderer,
-                Text.literal("Failed to load — check your connection."),
+                new LiteralText("Failed to load — check your connection."),
                 this.width / 2, GRID_TOP - 4, C_RED);
         }
     }
@@ -252,8 +253,8 @@ public class WordleScreen extends Screen {
 
         fill(matrices, boxX, boxY, boxX + boxW, boxY + boxH, 0xF0101010);
         drawRect(matrices, boxX, boxY, boxW, boxH, 1, 0xFF888888);
-        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(line1), this.width / 2, boxY + 7,  color1);
-        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(line2), this.width / 2, boxY + 20, C_WHITE);
+        drawCenteredTextWithShadow(matrices, textRenderer, new LiteralText(line1), this.width / 2, boxY + 7,  color1);
+        drawCenteredTextWithShadow(matrices, textRenderer, new LiteralText(line2), this.width / 2, boxY + 20, C_WHITE);
 
         int btnPad = 12;
         int btnW   = boxW - btnPad * 2;
@@ -264,7 +265,7 @@ public class WordleScreen extends Screen {
         copyBtnY = boxY + 33;
         fill(matrices, copyBtnX, copyBtnY, copyBtnX + copyBtnW, copyBtnY + copyBtnH, 0xFF333333);
         drawRect(matrices, copyBtnX, copyBtnY, copyBtnW, copyBtnH, 1, 0xFF666666);
-        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(copyLabel),
+        drawCenteredTextWithShadow(matrices, textRenderer, new LiteralText(copyLabel),
                 this.width / 2, copyBtnY + 3, C_WHITE);
 
         chatBtnW = btnW; chatBtnH = btnH;
@@ -272,7 +273,7 @@ public class WordleScreen extends Screen {
         chatBtnY = copyBtnY + btnH + 3;
         fill(matrices, chatBtnX, chatBtnY, chatBtnX + chatBtnW, chatBtnY + chatBtnH, 0xFF333333);
         drawRect(matrices, chatBtnX, chatBtnY, chatBtnW, chatBtnH, 1, 0xFF666666);
-        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(chatLabel),
+        drawCenteredTextWithShadow(matrices, textRenderer, new LiteralText(chatLabel),
                 this.width / 2, chatBtnY + 3, C_WHITE);
     }
 
