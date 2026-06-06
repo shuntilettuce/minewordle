@@ -8,7 +8,6 @@ import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -199,12 +198,12 @@ public class WordleScreen extends Screen {
         int panelBot  = keyboardTop() + 3 * (KEY_H + KEY_GAP) - KEY_GAP + 10;
         fill(matrices, panelLeft, panelTop, panelLeft + pw, panelBot, C_PANEL_BG);
 
-        drawCenteredTextWithShadow(matrices, textRenderer, new LiteralText("MINEWORDLE"), this.width / 2, panelTop + 4, C_WHITE);
+        drawCenteredTextWithShadow(matrices, textRenderer, new LiteralText("MINEWORDLE").asOrderedText(), this.width / 2, panelTop + 4, C_WHITE);
         fill(matrices, this.width / 2 - 80, panelTop + 14, this.width / 2 + 80, panelTop + 15, C_BORDER);
 
         if (practiceMode) {
             drawCenteredTextWithShadow(matrices, textRenderer,
-                new LiteralText("- PRACTICE -"), this.width / 2, panelTop + 17, C_PRACTICE);
+                new LiteralText("- PRACTICE -").asOrderedText(), this.width / 2, panelTop + 17, C_PRACTICE);
         }
 
         renderLoadingStatus(matrices);
@@ -219,7 +218,7 @@ public class WordleScreen extends Screen {
     private void renderLoadingStatus(MatrixStack matrices) {
         if (game.getGameState() == GameState.ERROR) {
             drawCenteredTextWithShadow(matrices, textRenderer,
-                new LiteralText("Failed to load — check your connection."),
+                new LiteralText("Failed to load — check your connection.").asOrderedText(),
                 this.width / 2, GRID_TOP - 4, C_RED);
         }
     }
@@ -253,8 +252,8 @@ public class WordleScreen extends Screen {
 
         fill(matrices, boxX, boxY, boxX + boxW, boxY + boxH, 0xF0101010);
         drawRect(matrices, boxX, boxY, boxW, boxH, 1, 0xFF888888);
-        drawCenteredTextWithShadow(matrices, textRenderer, new LiteralText(line1), this.width / 2, boxY + 7,  color1);
-        drawCenteredTextWithShadow(matrices, textRenderer, new LiteralText(line2), this.width / 2, boxY + 20, C_WHITE);
+        drawCenteredTextWithShadow(matrices, textRenderer, new LiteralText(line1).asOrderedText(), this.width / 2, boxY + 7,  color1);
+        drawCenteredTextWithShadow(matrices, textRenderer, new LiteralText(line2).asOrderedText(), this.width / 2, boxY + 20, C_WHITE);
 
         int btnPad = 12;
         int btnW   = boxW - btnPad * 2;
@@ -265,7 +264,7 @@ public class WordleScreen extends Screen {
         copyBtnY = boxY + 33;
         fill(matrices, copyBtnX, copyBtnY, copyBtnX + copyBtnW, copyBtnY + copyBtnH, 0xFF333333);
         drawRect(matrices, copyBtnX, copyBtnY, copyBtnW, copyBtnH, 1, 0xFF666666);
-        drawCenteredTextWithShadow(matrices, textRenderer, new LiteralText(copyLabel),
+        drawCenteredTextWithShadow(matrices, textRenderer, new LiteralText(copyLabel).asOrderedText(),
                 this.width / 2, copyBtnY + 3, C_WHITE);
 
         chatBtnW = btnW; chatBtnH = btnH;
@@ -273,7 +272,7 @@ public class WordleScreen extends Screen {
         chatBtnY = copyBtnY + btnH + 3;
         fill(matrices, chatBtnX, chatBtnY, chatBtnX + chatBtnW, chatBtnY + chatBtnH, 0xFF333333);
         drawRect(matrices, chatBtnX, chatBtnY, chatBtnW, chatBtnH, 1, 0xFF666666);
-        drawCenteredTextWithShadow(matrices, textRenderer, new LiteralText(chatLabel),
+        drawCenteredTextWithShadow(matrices, textRenderer, new LiteralText(chatLabel).asOrderedText(),
                 this.width / 2, chatBtnY + 3, C_WHITE);
     }
 
@@ -372,7 +371,7 @@ public class WordleScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) { this.close(); return true; }
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) { this.onClose(); return true; }
         if (game.getGameState() != GameState.PLAYING) return super.keyPressed(keyCode, scanCode, modifiers);
         if (keyCode == GLFW.GLFW_KEY_BACKSPACE) { game.removeLetter(); playClick(0.9f); return true; }
         if (keyCode == GLFW.GLFW_KEY_ENTER)     { handleSubmit(); return true; }
@@ -424,6 +423,5 @@ public class WordleScreen extends Screen {
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    @Override
     public boolean shouldPause() { return false; }
 }
