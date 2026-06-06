@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.14.10'
+    id 'fabric-loom' version '0.12.+'
     id 'com.modrinth.minotaur' version '2.+'
 }
 
@@ -31,10 +31,10 @@ processResources {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(17)
     }
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_16
+    targetCompatibility = JavaVersion.VERSION_16
     withSourcesJar()
 }
 
