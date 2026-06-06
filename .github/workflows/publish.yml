@@ -17,7 +17,7 @@ jobs:
         include:
           - branch: mc/1.17.1
             mc_version: 1.17.1
-            java: '17'
+            java: '21'
           - branch: mc/1.18
             mc_version: 1.18
           - branch: mc/1.18.1
