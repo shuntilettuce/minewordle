@@ -155,7 +155,7 @@ public class WordleScreen extends Screen {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) { flash("Not in a world!"); return; }
         String header = buildShareText().split("\n")[0];
-        client.player.networkHandler.sendChatMessage(header);
+        client.player.sendChatMessage(header);
         flash("Sent to chat!");
     }
 
@@ -198,12 +198,12 @@ public class WordleScreen extends Screen {
         int panelBot  = keyboardTop() + 3 * (KEY_H + KEY_GAP) - KEY_GAP + 10;
         fill(matrices, panelLeft, panelTop, panelLeft + pw, panelBot, C_PANEL_BG);
 
-        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal("MINEWORDLE"), this.width / 2, panelTop + 4, C_WHITE);
+        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal("MINEWORDLE").asOrderedText(), this.width / 2, panelTop + 4, C_WHITE);
         fill(matrices, this.width / 2 - 80, panelTop + 14, this.width / 2 + 80, panelTop + 15, C_BORDER);
 
         if (practiceMode) {
             drawCenteredTextWithShadow(matrices, textRenderer,
-                Text.literal("- PRACTICE -"), this.width / 2, panelTop + 17, C_PRACTICE);
+                Text.literal("- PRACTICE -").asOrderedText(), this.width / 2, panelTop + 17, C_PRACTICE);
         }
 
         renderLoadingStatus(matrices);
@@ -218,7 +218,7 @@ public class WordleScreen extends Screen {
     private void renderLoadingStatus(MatrixStack matrices) {
         if (game.getGameState() == GameState.ERROR) {
             drawCenteredTextWithShadow(matrices, textRenderer,
-                Text.literal("Failed to load — check your connection."),
+                Text.literal("Failed to load — check your connection.").asOrderedText(),
                 this.width / 2, GRID_TOP - 4, C_RED);
         }
     }
@@ -252,8 +252,8 @@ public class WordleScreen extends Screen {
 
         fill(matrices, boxX, boxY, boxX + boxW, boxY + boxH, 0xF0101010);
         drawRect(matrices, boxX, boxY, boxW, boxH, 1, 0xFF888888);
-        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(line1), this.width / 2, boxY + 7,  color1);
-        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(line2), this.width / 2, boxY + 20, C_WHITE);
+        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(line1).asOrderedText(), this.width / 2, boxY + 7,  color1);
+        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(line2).asOrderedText(), this.width / 2, boxY + 20, C_WHITE);
 
         int btnPad = 12;
         int btnW   = boxW - btnPad * 2;
@@ -264,7 +264,7 @@ public class WordleScreen extends Screen {
         copyBtnY = boxY + 33;
         fill(matrices, copyBtnX, copyBtnY, copyBtnX + copyBtnW, copyBtnY + copyBtnH, 0xFF333333);
         drawRect(matrices, copyBtnX, copyBtnY, copyBtnW, copyBtnH, 1, 0xFF666666);
-        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(copyLabel),
+        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(copyLabel).asOrderedText(),
                 this.width / 2, copyBtnY + 3, C_WHITE);
 
         chatBtnW = btnW; chatBtnH = btnH;
@@ -272,7 +272,7 @@ public class WordleScreen extends Screen {
         chatBtnY = copyBtnY + btnH + 3;
         fill(matrices, chatBtnX, chatBtnY, chatBtnX + chatBtnW, chatBtnY + chatBtnH, 0xFF333333);
         drawRect(matrices, chatBtnX, chatBtnY, chatBtnW, chatBtnH, 1, 0xFF666666);
-        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(chatLabel),
+        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(chatLabel).asOrderedText(),
                 this.width / 2, chatBtnY + 3, C_WHITE);
     }
 
