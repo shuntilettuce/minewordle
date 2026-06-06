@@ -15,10 +15,23 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - branch: mc/1.17.1
+            mc_version: 1.17.1
+            java: '17'
+          - branch: mc/1.18
+            mc_version: 1.18
+          - branch: mc/1.18.1
+            mc_version: 1.18.1
           - branch: mc/1.18.2
             mc_version: 1.18.2
+          - branch: mc/1.19
+            mc_version: 1.19
+          - branch: mc/1.19.1
+            mc_version: 1.19.1
           - branch: mc/1.19.2
             mc_version: 1.19.2
+          - branch: mc/1.19.3
+            mc_version: 1.19.3
           - branch: mc/1.19.4
             mc_version: 1.19.4
           - branch: mc/1.20
@@ -180,8 +193,14 @@ jobs:
             fi
           }
 
+          publish_one "1.17.1"
+          publish_one "1.18"
+          publish_one "1.18.1"
           publish_one "1.18.2"
+          publish_one "1.19"
+          publish_one "1.19.1"
           publish_one "1.19.2"
+          publish_one "1.19.3"
           publish_one "1.19.4"
           publish_one "1.20"
           publish_one "1.20.1"
