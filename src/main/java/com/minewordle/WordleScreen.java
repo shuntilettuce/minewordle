@@ -3,9 +3,9 @@ package com.minewordle;
 import com.minewordle.WordleGame.GameState;
 import com.minewordle.WordleGame.TileState;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
@@ -15,7 +15,6 @@ import java.time.temporal.ChronoUnit;
 
 public class WordleScreen extends Screen {
 
-    // Colors (ARGB)
     private static final int C_CORRECT       = 0xFF538D4E;
     private static final int C_PRESENT       = 0xFFB59F3B;
     private static final int C_ABSENT        = 0xFF3A3A3C;
@@ -26,7 +25,6 @@ public class WordleScreen extends Screen {
     private static final int C_WHITE         = 0xFFFFFFFF;
     private static final int C_GREEN         = 0xFF538D4E;
     private static final int C_RED           = 0xFFFF5555;
-    private static final int C_GRAY          = 0xFFAAAAAA;
     private static final int C_PANEL_BG      = 0xD0121213;
     private static final int C_PRACTICE      = 0xFF88FF88;
 
@@ -49,7 +47,6 @@ public class WordleScreen extends Screen {
     private String flashMsg   = "";
     private int    flashTimer = 0;
 
-    // ボタンのヒットエリア（renderEndOverlay で毎フレーム更新）
     private int copyBtnX, copyBtnY, copyBtnW, copyBtnH;
     private int chatBtnX, chatBtnY, chatBtnW, chatBtnH;
 
@@ -100,8 +97,6 @@ public class WordleScreen extends Screen {
         KEY_W_WIDE = TILE_SIZE * 40 / 46;
     }
 
-    // ── ヘルパー ──────────────────────────────────────────────────────────────
-
     private int gridLeft() {
         return (this.width - (5 * TILE_SIZE + 4 * TILE_GAP)) / 2;
     }
@@ -151,8 +146,6 @@ public class WordleScreen extends Screen {
         );
     }
 
-    // ── シェア機能 ────────────────────────────────────────────────────────────
-
     private void copyShare() {
         MinecraftClient.getInstance().keyboard.setClipboard(buildShareText());
         flash("Copied!");
@@ -195,44 +188,42 @@ public class WordleScreen extends Screen {
         return sb.toString();
     }
 
-    // ── 描画 ──────────────────────────────────────────────────────────────────
-
     @Override
-    public void render(DrawContext ctx, int mx, int my, float delta) {
-        ctx.fill(0, 0, this.width, this.height, 0xC0000000);
+    public void render(MatrixStack matrices, int mx, int my, float delta) {
+        fill(matrices, 0, 0, this.width, this.height, 0xC0000000);
 
         int pw        = panelWidth();
         int panelLeft = (this.width - pw) / 2;
         int panelTop  = GRID_TOP - 24;
         int panelBot  = keyboardTop() + 3 * (KEY_H + KEY_GAP) - KEY_GAP + 10;
-        ctx.fill(panelLeft, panelTop, panelLeft + pw, panelBot, C_PANEL_BG);
+        fill(matrices, panelLeft, panelTop, panelLeft + pw, panelBot, C_PANEL_BG);
 
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("MINEWORDLE"), this.width / 2, panelTop + 4, C_WHITE);
-        ctx.fill(this.width / 2 - 80, panelTop + 14, this.width / 2 + 80, panelTop + 15, C_BORDER);
+        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal("MINEWORDLE"), this.width / 2, panelTop + 4, C_WHITE);
+        fill(matrices, this.width / 2 - 80, panelTop + 14, this.width / 2 + 80, panelTop + 15, C_BORDER);
 
         if (practiceMode) {
-            ctx.drawCenteredTextWithShadow(textRenderer,
+            drawCenteredTextWithShadow(matrices, textRenderer,
                 Text.literal("- PRACTICE -"), this.width / 2, panelTop + 17, C_PRACTICE);
         }
 
-        renderLoadingStatus(ctx);
-        renderGrid(ctx);
-        renderKeyboard(ctx);
-        renderEndOverlay(ctx);
-        renderFlash(ctx);
+        renderLoadingStatus(matrices);
+        renderGrid(matrices);
+        renderKeyboard(matrices);
+        renderEndOverlay(matrices);
+        renderFlash(matrices);
 
-        super.render(ctx, mx, my, delta);
+        super.render(matrices, mx, my, delta);
     }
 
-    private void renderLoadingStatus(DrawContext ctx) {
+    private void renderLoadingStatus(MatrixStack matrices) {
         if (game.getGameState() == GameState.ERROR) {
-            ctx.drawCenteredTextWithShadow(textRenderer,
+            drawCenteredTextWithShadow(matrices, textRenderer,
                 Text.literal("Failed to load — check your connection."),
                 this.width / 2, GRID_TOP - 4, C_RED);
         }
     }
 
-    private void renderEndOverlay(DrawContext ctx) {
+    private void renderEndOverlay(MatrixStack matrices) {
         GameState state = game.getGameState();
         if (state != GameState.WON && state != GameState.LOST) return;
 
@@ -259,10 +250,10 @@ public class WordleScreen extends Screen {
         int boxX = this.width  / 2 - boxW / 2;
         int boxY = this.height / 2 - boxH / 2;
 
-        ctx.fill(boxX, boxY, boxX + boxW, boxY + boxH, 0xF0101010);
-        drawRect(ctx, boxX, boxY, boxW, boxH, 1, 0xFF888888);
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(line1), this.width / 2, boxY + 7,  color1);
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(line2), this.width / 2, boxY + 20, C_WHITE);
+        fill(matrices, boxX, boxY, boxX + boxW, boxY + boxH, 0xF0101010);
+        drawRect(matrices, boxX, boxY, boxW, boxH, 1, 0xFF888888);
+        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(line1), this.width / 2, boxY + 7,  color1);
+        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(line2), this.width / 2, boxY + 20, C_WHITE);
 
         int btnPad = 12;
         int btnW   = boxW - btnPad * 2;
@@ -271,27 +262,27 @@ public class WordleScreen extends Screen {
         copyBtnW = btnW; copyBtnH = btnH;
         copyBtnX = boxX + btnPad;
         copyBtnY = boxY + 33;
-        ctx.fill(copyBtnX, copyBtnY, copyBtnX + copyBtnW, copyBtnY + copyBtnH, 0xFF333333);
-        drawRect(ctx, copyBtnX, copyBtnY, copyBtnW, copyBtnH, 1, 0xFF666666);
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(copyLabel),
+        fill(matrices, copyBtnX, copyBtnY, copyBtnX + copyBtnW, copyBtnY + copyBtnH, 0xFF333333);
+        drawRect(matrices, copyBtnX, copyBtnY, copyBtnW, copyBtnH, 1, 0xFF666666);
+        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(copyLabel),
                 this.width / 2, copyBtnY + 3, C_WHITE);
 
         chatBtnW = btnW; chatBtnH = btnH;
         chatBtnX = boxX + btnPad;
         chatBtnY = copyBtnY + btnH + 3;
-        ctx.fill(chatBtnX, chatBtnY, chatBtnX + chatBtnW, chatBtnY + chatBtnH, 0xFF333333);
-        drawRect(ctx, chatBtnX, chatBtnY, chatBtnW, chatBtnH, 1, 0xFF666666);
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(chatLabel),
+        fill(matrices, chatBtnX, chatBtnY, chatBtnX + chatBtnW, chatBtnY + chatBtnH, 0xFF333333);
+        drawRect(matrices, chatBtnX, chatBtnY, chatBtnW, chatBtnH, 1, 0xFF666666);
+        drawCenteredTextWithShadow(matrices, textRenderer, Text.literal(chatLabel),
                 this.width / 2, chatBtnY + 3, C_WHITE);
     }
 
-    private void renderGrid(DrawContext ctx) {
-        int left       = gridLeft();
+    private void renderGrid(MatrixStack matrices) {
+        int left          = gridLeft();
         String[] guesses  = game.getGuesses();
         TileState[][] eval = game.getEvaluated();
-        String current = game.getCurrentInput();
-        int guessIdx   = game.getGuessIndex();
-        boolean playing = game.getGameState() == GameState.PLAYING;
+        String current    = game.getCurrentInput();
+        int guessIdx      = game.getGuessIndex();
+        boolean playing   = game.getGameState() == GameState.PLAYING;
 
         for (int row = 0; row < 6; row++) {
             for (int col = 0; col < 5; col++) {
@@ -315,15 +306,15 @@ public class WordleScreen extends Screen {
                     }
                 }
 
-                ctx.fill(x, y, x + TILE_SIZE, y + TILE_SIZE, bg);
-                drawRect(ctx, x, y, TILE_SIZE, TILE_SIZE, 2, border);
+                fill(matrices, x, y, x + TILE_SIZE, y + TILE_SIZE, bg);
+                drawRect(matrices, x, y, TILE_SIZE, TILE_SIZE, 2, border);
                 if (!letter.isEmpty())
-                    drawCentered(ctx, letter, x + TILE_SIZE / 2, y + TILE_SIZE / 2, C_WHITE);
+                    drawCentered(matrices, letter, x + TILE_SIZE / 2, y + TILE_SIZE / 2, C_WHITE);
             }
         }
     }
 
-    private void renderKeyboard(DrawContext ctx) {
+    private void renderKeyboard(MatrixStack matrices) {
         TileState[] ks  = game.getKeyStates();
         int         top = keyboardTop();
 
@@ -343,44 +334,40 @@ public class WordleScreen extends Screen {
                     TileState ts = ks[key.charAt(0) - 'A'];
                     if (ts != null) bg = tileColor(ts);
                 }
-                ctx.fill(x, y, x + kw, y + KEY_H, bg);
-                ctx.fill(x, y + KEY_H - 3, x + kw, y + KEY_H, darken(bg));
+                fill(matrices, x, y, x + kw, y + KEY_H, bg);
+                fill(matrices, x, y + KEY_H - 3, x + kw, y + KEY_H, darken(bg));
                 int lw = textRenderer.getWidth(key);
-                ctx.drawText(textRenderer, key, x + kw / 2 - lw / 2, y + KEY_H / 2 - 4, C_WHITE, false);
+                textRenderer.draw(matrices, key, x + kw / 2 - lw / 2, y + KEY_H / 2 - 4, C_WHITE);
                 x += kw + KEY_GAP;
             }
         }
     }
 
-    private void renderFlash(DrawContext ctx) {
+    private void renderFlash(MatrixStack matrices) {
         if (flashTimer <= 0) return;
         flashTimer--;
         int fw = textRenderer.getWidth(flashMsg);
         int fx = this.width / 2 - fw / 2;
         int fy = GRID_TOP - 14;
-        ctx.fill(fx - 6, fy - 2, fx + fw + 6, fy + 12, C_WHITE);
-        ctx.drawText(textRenderer, flashMsg, fx, fy + 1, 0xFF000000, false);
+        fill(matrices, fx - 6, fy - 2, fx + fw + 6, fy + 12, C_WHITE);
+        textRenderer.draw(matrices, flashMsg, fx, fy + 1, 0xFF000000);
     }
 
     private boolean isWide(String key) {
         return key.equals("ENT") || key.equals("DEL");
     }
 
-    // ── 描画ユーティリティ ────────────────────────────────────────────────────
-
-    private void drawRect(DrawContext ctx, int x, int y, int w, int h, int t, int color) {
-        ctx.fill(x,         y,         x + w,     y + t,     color);
-        ctx.fill(x,         y + h - t, x + w,     y + h,     color);
-        ctx.fill(x,         y,         x + t,     y + h,     color);
-        ctx.fill(x + w - t, y,         x + w,     y + h,     color);
+    private void drawRect(MatrixStack matrices, int x, int y, int w, int h, int t, int color) {
+        fill(matrices, x,         y,         x + w,     y + t,     color);
+        fill(matrices, x,         y + h - t, x + w,     y + h,     color);
+        fill(matrices, x,         y,         x + t,     y + h,     color);
+        fill(matrices, x + w - t, y,         x + w,     y + h,     color);
     }
 
-    private void drawCentered(DrawContext ctx, String text, int cx, int cy, int color) {
+    private void drawCentered(MatrixStack matrices, String text, int cx, int cy, int color) {
         int tw = textRenderer.getWidth(text);
-        ctx.drawText(textRenderer, text, cx - tw / 2, cy - 4, color, false);
+        textRenderer.draw(matrices, text, cx - tw / 2, cy - 4, color);
     }
-
-    // ── 入力 ─────────────────────────────────────────────────────────────────
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
