@@ -15,6 +15,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - branch: mc/1.18.2
+            mc_version: 1.18.2
+          - branch: mc/1.19.2
+            mc_version: 1.19.2
+          - branch: mc/1.19.4
+            mc_version: 1.19.4
           - branch: mc/1.20
             mc_version: "1.20"
           - branch: mc/1.20.1
@@ -174,6 +180,9 @@ jobs:
             fi
           }
 
+          publish_one "1.18.2"
+          publish_one "1.19.2"
+          publish_one "1.19.4"
           publish_one "1.20"
           publish_one "1.20.1"
           publish_one "1.20.2"
