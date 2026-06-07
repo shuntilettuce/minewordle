@@ -15,15 +15,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - branch: mc/1.14
-            mc_version: "1.14"
-            java: '21'
-          - branch: mc/1.14.1
-            mc_version: 1.14.1
-            java: '21'
-          - branch: mc/1.14.2
-            mc_version: 1.14.2
-            java: '21'
           - branch: mc/1.14.3
             mc_version: 1.14.3
             java: '21'
@@ -238,9 +229,6 @@ jobs:
             fi
           }
 
-          publish_one "1.14"
-          publish_one "1.14.1"
-          publish_one "1.14.2"
           publish_one "1.14.3"
           publish_one "1.14.4"
           publish_one "1.15"
