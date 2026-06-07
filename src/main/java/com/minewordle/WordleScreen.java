@@ -50,13 +50,13 @@ public class WordleScreen extends Screen {
         fill(0,0,this.width,this.height,0xC0000000);
         int pw=panelWidth(),pl=(this.width-pw)/2,pt=GRID_TOP-24,pb=keyboardTop()+3*(KEY_H+KEY_GAP)-KEY_GAP+10;
         fill(pl,pt,pl+pw,pb,C_PANEL_BG);
-        drawCenteredString(MinecraftClient.getInstance().MinecraftClient.getInstance().textRenderer,"MINEWORDLE",this.width/2,pt+4,C_WHITE);
+        drawCenteredString(MinecraftClient.getInstance().textRenderer,"MINEWORDLE",this.width/2,pt+4,C_WHITE);
         fill(this.width/2-80,pt+14,this.width/2+80,pt+15,C_BORDER);
-        if(practiceMode)drawCenteredString(MinecraftClient.getInstance().MinecraftClient.getInstance().textRenderer,"- PRACTICE -",this.width/2,pt+17,C_PRACTICE);
+        if(practiceMode)drawCenteredString(MinecraftClient.getInstance().textRenderer,"- PRACTICE -",this.width/2,pt+17,C_PRACTICE);
         renderLoadingStatus();renderGrid();renderKeyboard();renderEndOverlay();renderFlash();
         super.render(mx,my,delta);
     }
-    private void renderLoadingStatus(){if(game.getGameState()==GameState.ERROR)drawCenteredString(MinecraftClient.getInstance().MinecraftClient.getInstance().textRenderer,"Failed to load — check your connection.",this.width/2,GRID_TOP-4,C_RED);}
+    private void renderLoadingStatus(){if(game.getGameState()==GameState.ERROR)drawCenteredString(MinecraftClient.getInstance().textRenderer,"Failed to load — check your connection.",this.width/2,GRID_TOP-4,C_RED);}
     private void renderEndOverlay(){
         GameState state=game.getGameState();if(state!=GameState.WON&&state!=GameState.LOST)return;
         boolean won=(state==GameState.WON);int g=game.getGuessIndex();
@@ -65,15 +65,15 @@ public class WordleScreen extends Screen {
         int color1=won?C_GREEN:C_RED,boxW=Math.max(Math.max(MinecraftClient.getInstance().textRenderer.getStringWidth(line1),MinecraftClient.getInstance().textRenderer.getStringWidth(line2)),MinecraftClient.getInstance().textRenderer.getStringWidth(copyLabel)+20)+28,boxH=68;
         int boxX=this.width/2-boxW/2,boxY=this.height/2-boxH/2;
         fill(boxX,boxY,boxX+boxW,boxY+boxH,0xF0101010);drawRect(boxX,boxY,boxW,boxH,1,0xFF888888);
-        drawCenteredString(MinecraftClient.getInstance().MinecraftClient.getInstance().textRenderer,line1,this.width/2,boxY+7,color1);
-        drawCenteredString(MinecraftClient.getInstance().MinecraftClient.getInstance().textRenderer,line2,this.width/2,boxY+20,C_WHITE);
+        drawCenteredString(MinecraftClient.getInstance().textRenderer,line1,this.width/2,boxY+7,color1);
+        drawCenteredString(MinecraftClient.getInstance().textRenderer,line2,this.width/2,boxY+20,C_WHITE);
         int bp=12,bw=boxW-bp*2,bh=13;
         copyBtnW=bw;copyBtnH=bh;copyBtnX=boxX+bp;copyBtnY=boxY+33;
         fill(copyBtnX,copyBtnY,copyBtnX+bw,copyBtnY+bh,0xFF333333);drawRect(copyBtnX,copyBtnY,bw,bh,1,0xFF666666);
-        drawCenteredString(MinecraftClient.getInstance().MinecraftClient.getInstance().textRenderer,copyLabel,this.width/2,copyBtnY+3,C_WHITE);
+        drawCenteredString(MinecraftClient.getInstance().textRenderer,copyLabel,this.width/2,copyBtnY+3,C_WHITE);
         chatBtnW=bw;chatBtnH=bh;chatBtnX=boxX+bp;chatBtnY=copyBtnY+bh+3;
         fill(chatBtnX,chatBtnY,chatBtnX+bw,chatBtnY+bh,0xFF333333);drawRect(chatBtnX,chatBtnY,bw,bh,1,0xFF666666);
-        drawCenteredString(MinecraftClient.getInstance().MinecraftClient.getInstance().textRenderer,chatLabel,this.width/2,chatBtnY+3,C_WHITE);
+        drawCenteredString(MinecraftClient.getInstance().textRenderer,chatLabel,this.width/2,chatBtnY+3,C_WHITE);
     }
     private void renderGrid(){
         int left=gridLeft();String[] gs=game.getGuesses();TileState[][] eval=game.getEvaluated();
