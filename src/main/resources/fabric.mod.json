@@ -3,25 +3,16 @@
   "id": "minewordle",
   "version": "${version}",
   "name": "MineWordle",
-  "description": "Play Wordle inside Minecraft! Use /wordle command to open the game.",
-  "authors": [
-    "shunti"
-  ],
-  "contact": {
-    "sources": "https://modrinth.com/mod/minewordle"
-  },
+  "description": "Wordle inside Minecraft",
+  "authors": ["shuntilettuce"],
   "license": "MIT",
   "environment": "client",
   "entrypoints": {
-    "client": [
-      "com.minewordle.MineWordleMod"
-    ]
+    "client": ["com.minewordle.MineWordleMod"]
   },
-  "mixins": [],
   "depends": {
-    "fabricloader": ">=0.12.0",
-    "fabric-api": "*",
-    "minecraft": "~1.17.1",
-    "java": ">=16"
+    "fabricloader": ">=0.15.0",
+    "fabric": "*",
+    "minecraft": "~1.14.3"
   }
 }
