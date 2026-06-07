@@ -17,13 +17,13 @@ jobs:
         include:
           - branch: mc/1.14
             mc_version: "1.14"
-            java: '17'
+            java: '21'
           - branch: mc/1.14.1
             mc_version: 1.14.1
-            java: '17'
+            java: '21'
           - branch: mc/1.14.2
             mc_version: 1.14.2
-            java: '17'
+            java: '21'
           - branch: mc/1.14.3
             mc_version: 1.14.3
             java: '21'
@@ -142,7 +142,7 @@ jobs:
           cache: gradle
 
       - name: Build
-        run: chmod +x gradlew && ./gradlew ${{ matrix.build_task || 'remapJar' }}
+        run: chmod +x gradlew && ./gradlew ${{ matrix.build_task || 'remapJar' }} --stacktrace
 
       - name: Prepare JAR
         run: |
