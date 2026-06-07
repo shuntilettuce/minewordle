@@ -50,30 +50,30 @@ public class WordleScreen extends Screen {
         fill(0,0,this.width,this.height,0xC0000000);
         int pw=panelWidth(),pl=(this.width-pw)/2,pt=GRID_TOP-24,pb=keyboardTop()+3*(KEY_H+KEY_GAP)-KEY_GAP+10;
         fill(pl,pt,pl+pw,pb,C_PANEL_BG);
-        drawCenteredString(this.client.textRenderer,"MINEWORDLE",this.width/2,pt+4,C_WHITE);
+        drawCenteredString(MinecraftClient.getInstance().textRenderer,"MINEWORDLE",this.width/2,pt+4,C_WHITE);
         fill(this.width/2-80,pt+14,this.width/2+80,pt+15,C_BORDER);
-        if(practiceMode)drawCenteredString(this.client.textRenderer,"- PRACTICE -",this.width/2,pt+17,C_PRACTICE);
+        if(practiceMode)drawCenteredString(MinecraftClient.getInstance().textRenderer,"- PRACTICE -",this.width/2,pt+17,C_PRACTICE);
         renderLoadingStatus();renderGrid();renderKeyboard();renderEndOverlay();renderFlash();
         super.render(mx,my,delta);
     }
-    private void renderLoadingStatus(){if(game.getGameState()==GameState.ERROR)drawCenteredString(this.client.textRenderer,"Failed to load — check your connection.",this.width/2,GRID_TOP-4,C_RED);}
+    private void renderLoadingStatus(){if(game.getGameState()==GameState.ERROR)drawCenteredString(MinecraftClient.getInstance().textRenderer,"Failed to load — check your connection.",this.width/2,GRID_TOP-4,C_RED);}
     private void renderEndOverlay(){
         GameState state=game.getGameState();if(state!=GameState.WON&&state!=GameState.LOST)return;
         boolean won=(state==GameState.WON);int g=game.getGuessIndex();
         String line1=won?switch(g){case 1->"Genius!";case 2->"Magnificent!";case 3->"Impressive!";case 4->"Splendid!";case 5->"Great!";default->"Phew!";}:"Game over!";
         String line2="The word was: "+game.getSolution(),copyLabel="[ COPY ]",chatLabel="[ CHAT ]";
-        int color1=won?C_GREEN:C_RED,boxW=Math.max(Math.max(this.client.textRenderer.getWidth(line1),this.client.textRenderer.getWidth(line2)),this.client.textRenderer.getWidth(copyLabel)+20)+28,boxH=68;
+        int color1=won?C_GREEN:C_RED,boxW=Math.max(Math.max(MinecraftClient.getInstance().textRenderer.getWidth(line1),MinecraftClient.getInstance().textRenderer.getWidth(line2)),MinecraftClient.getInstance().textRenderer.getWidth(copyLabel)+20)+28,boxH=68;
         int boxX=this.width/2-boxW/2,boxY=this.height/2-boxH/2;
         fill(boxX,boxY,boxX+boxW,boxY+boxH,0xF0101010);drawRect(boxX,boxY,boxW,boxH,1,0xFF888888);
-        drawCenteredString(this.client.textRenderer,line1,this.width/2,boxY+7,color1);
-        drawCenteredString(this.client.textRenderer,line2,this.width/2,boxY+20,C_WHITE);
+        drawCenteredString(MinecraftClient.getInstance().textRenderer,line1,this.width/2,boxY+7,color1);
+        drawCenteredString(MinecraftClient.getInstance().textRenderer,line2,this.width/2,boxY+20,C_WHITE);
         int bp=12,bw=boxW-bp*2,bh=13;
         copyBtnW=bw;copyBtnH=bh;copyBtnX=boxX+bp;copyBtnY=boxY+33;
         fill(copyBtnX,copyBtnY,copyBtnX+bw,copyBtnY+bh,0xFF333333);drawRect(copyBtnX,copyBtnY,bw,bh,1,0xFF666666);
-        drawCenteredString(this.client.textRenderer,copyLabel,this.width/2,copyBtnY+3,C_WHITE);
+        drawCenteredString(MinecraftClient.getInstance().textRenderer,copyLabel,this.width/2,copyBtnY+3,C_WHITE);
         chatBtnW=bw;chatBtnH=bh;chatBtnX=boxX+bp;chatBtnY=copyBtnY+bh+3;
         fill(chatBtnX,chatBtnY,chatBtnX+bw,chatBtnY+bh,0xFF333333);drawRect(chatBtnX,chatBtnY,bw,bh,1,0xFF666666);
-        drawCenteredString(this.client.textRenderer,chatLabel,this.width/2,chatBtnY+3,C_WHITE);
+        drawCenteredString(MinecraftClient.getInstance().textRenderer,chatLabel,this.width/2,chatBtnY+3,C_WHITE);
     }
     private void renderGrid(){
         int left=gridLeft();String[] gs=game.getGuesses();TileState[][] eval=game.getEvaluated();
@@ -95,12 +95,12 @@ public class WordleScreen extends Screen {
             for(String key:keys){int kw=isWide(key)?KEY_W_WIDE:KEY_W,bg=C_KEY_DEFAULT;
                 if(key.length()==1){TileState ts=ks[key.charAt(0)-'A'];if(ts!=null)bg=tileColor(ts);}
                 fill(x,y,x+kw,y+KEY_H,bg);fill(x,y+KEY_H-3,x+kw,y+KEY_H,darken(bg));
-                this.client.textRenderer.draw(key,x+kw/2-this.client.textRenderer.getWidth(key)/2,y+KEY_H/2-4,C_WHITE);x+=kw+KEY_GAP;}}
+                MinecraftClient.getInstance().textRenderer.draw(key,x+kw/2-MinecraftClient.getInstance().textRenderer.getWidth(key)/2,y+KEY_H/2-4,C_WHITE);x+=kw+KEY_GAP;}}
     }
-    private void renderFlash(){if(flashTimer<=0)return;flashTimer--;int fw=this.client.textRenderer.getWidth(flashMsg),fx=this.width/2-fw/2,fy=GRID_TOP-14;fill(fx-6,fy-2,fx+fw+6,fy+12,C_WHITE);this.client.textRenderer.draw(flashMsg,fx,fy+1,0xFF000000);}
+    private void renderFlash(){if(flashTimer<=0)return;flashTimer--;int fw=MinecraftClient.getInstance().textRenderer.getWidth(flashMsg),fx=this.width/2-fw/2,fy=GRID_TOP-14;fill(fx-6,fy-2,fx+fw+6,fy+12,C_WHITE);MinecraftClient.getInstance().textRenderer.draw(flashMsg,fx,fy+1,0xFF000000);}
     private boolean isWide(String k){return k.equals("ENT")||k.equals("DEL");}
     private void drawRect(int x,int y,int w,int h,int t,int c){fill(x,y,x+w,y+t,c);fill(x,y+h-t,x+w,y+h,c);fill(x,y,x+t,y+h,c);fill(x+w-t,y,x+w,y+h,c);}
-    private void drawCentered(String text,int cx,int cy,int color){this.client.textRenderer.draw(text,cx-this.client.textRenderer.getWidth(text)/2,cy-4,color);}
+    private void drawCentered(String text,int cx,int cy,int color){MinecraftClient.getInstance().textRenderer.draw(text,cx-MinecraftClient.getInstance().textRenderer.getWidth(text)/2,cy-4,color);}
     @Override public boolean keyPressed(int kc,int sc,int mod){if(kc==GLFW.GLFW_KEY_ESCAPE){this.onClose();return true;}if(game.getGameState()!=GameState.PLAYING)return super.keyPressed(kc,sc,mod);if(kc==GLFW.GLFW_KEY_BACKSPACE){game.removeLetter();playClick(0.9f);return true;}if(kc==GLFW.GLFW_KEY_ENTER){handleSubmit();return true;}return super.keyPressed(kc,sc,mod);}
     @Override public boolean charTyped(char chr,int mod){if(game.getGameState()!=GameState.PLAYING)return false;if(Character.isLetter(chr)){game.addLetter(chr);playClick(0.9f+(float)Math.random()*0.2f);return true;}return false;}
     private void handleSubmit(){String r=game.submitGuess();switch(r){case "NOT_ENOUGH_LETTERS"->flash("Not enough letters!");case "NOT_A_WORD"->flash("Not a word!");case "WON"->playWinSound(game.getGuessIndex());case "LOST"->playClick(0.6f);default->playClick(1.1f);}}
