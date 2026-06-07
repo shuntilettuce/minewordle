@@ -1,21 +1,20 @@
 package com.minewordle;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
-import net.minecraft.client.MinecraftClient;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.client.option.KeyBinding;
+import org.lwjgl.glfw.GLFW;
 
 public class MineWordleMod implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        ClientCommandManager.DISPATCHER.register(
-            ClientCommandManager.literal("wordle")
-                .executes(ctx -> openScreen(ctx.getSource().getClient(), false))
-                .then(ClientCommandManager.literal("practice")
-                    .executes(ctx -> openScreen(ctx.getSource().getClient(), true)))
-        );
-    }
-    private static int openScreen(MinecraftClient client, boolean practiceMode) {
-        client.execute(() -> { if (client.currentScreen == null) client.openScreen(new WordleScreen(practiceMode)); });
-        return 1;
+        KeyBinding key = KeyBindingHelper.registerKeyBinding(
+            new KeyBinding("key.minewordle.open", GLFW.GLFW_KEY_UNKNOWN, "MineWordle"));
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            while (key.wasPressed()) {
+                if (client.currentScreen == null) client.openScreen(new WordleScreen(false));
+            }
+        });
     }
 }
