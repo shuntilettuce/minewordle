@@ -19,7 +19,7 @@ public class MineWordleMod implements ClientModInitializer {
     private static int openScreen(MinecraftClient client, boolean practiceMode) {
         client.execute(() -> {
             if (client.currentScreen == null) {
-                client.setScreen(new WordleScreen(practiceMode));
+                client.openScreen(new WordleScreen(practiceMode));
             }
         });
         return 1;
