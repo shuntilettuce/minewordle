@@ -121,6 +121,126 @@ jobs:
             java: '25'
             build_task: jar
 
+          # NeoForge
+          - branch: neoforge/1.20.4
+            mc_version: 1.20.4
+            loader: neoforge
+            build_task: build
+          - branch: neoforge/1.20.6
+            mc_version: 1.20.6
+            loader: neoforge
+            build_task: build
+          - branch: neoforge/1.21
+            mc_version: "1.21"
+            loader: neoforge
+            build_task: build
+          - branch: neoforge/1.21.1
+            mc_version: 1.21.1
+            loader: neoforge
+            build_task: build
+          - branch: neoforge/1.21.2
+            mc_version: 1.21.2
+            loader: neoforge
+            build_task: build
+          - branch: neoforge/1.21.3
+            mc_version: 1.21.3
+            loader: neoforge
+            build_task: build
+          - branch: neoforge/1.21.4
+            mc_version: 1.21.4
+            loader: neoforge
+            build_task: build
+          - branch: neoforge/1.21.5
+            mc_version: 1.21.5
+            loader: neoforge
+            build_task: build
+          - branch: neoforge/1.21.6
+            mc_version: 1.21.6
+            loader: neoforge
+            build_task: build
+          - branch: neoforge/1.21.7
+            mc_version: 1.21.7
+            loader: neoforge
+            build_task: build
+          - branch: neoforge/1.21.8
+            mc_version: 1.21.8
+            loader: neoforge
+            build_task: build
+          - branch: neoforge/1.21.9
+            mc_version: 1.21.9
+            loader: neoforge
+            build_task: build
+          - branch: neoforge/1.21.10
+            mc_version: 1.21.10
+            loader: neoforge
+            build_task: build
+          - branch: neoforge/1.21.11
+            mc_version: 1.21.11
+            loader: neoforge
+            build_task: build
+
+          # Forge
+          - branch: forge/1.20.2
+            mc_version: 1.20.2
+            loader: forge
+            build_task: build
+          - branch: forge/1.20.3
+            mc_version: 1.20.3
+            loader: forge
+            build_task: build
+          - branch: forge/1.20.4
+            mc_version: 1.20.4
+            loader: forge
+            build_task: build
+          - branch: forge/1.20.6
+            mc_version: 1.20.6
+            loader: forge
+            build_task: build
+          - branch: forge/1.21
+            mc_version: "1.21"
+            loader: forge
+            build_task: build
+          - branch: forge/1.21.1
+            mc_version: 1.21.1
+            loader: forge
+            build_task: build
+          - branch: forge/1.21.3
+            mc_version: 1.21.3
+            loader: forge
+            build_task: build
+          - branch: forge/1.21.4
+            mc_version: 1.21.4
+            loader: forge
+            build_task: build
+          - branch: forge/1.21.5
+            mc_version: 1.21.5
+            loader: forge
+            build_task: build
+          - branch: forge/1.21.6
+            mc_version: 1.21.6
+            loader: forge
+            build_task: build
+          - branch: forge/1.21.7
+            mc_version: 1.21.7
+            loader: forge
+            build_task: build
+          - branch: forge/1.21.8
+            mc_version: 1.21.8
+            loader: forge
+            build_task: build
+          - branch: forge/1.21.9
+            mc_version: 1.21.9
+            loader: forge
+            build_task: build
+          - branch: forge/1.21.10
+            mc_version: 1.21.10
+            loader: forge
+            build_task: build
+          - branch: forge/1.21.11
+            mc_version: 1.21.11
+            loader: forge
+            build_task: build
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -138,12 +258,13 @@ jobs:
       - name: Prepare JAR
         run: |
           MOD_VERSION=$(grep '^mod_version=' gradle.properties | cut -d= -f2)
-          cp build/libs/minewordle-${MOD_VERSION}.jar minewordle-${{ matrix.mc_version }}.jar
+          TAG="${{ matrix.loader && format('{0}-{1}', matrix.loader, matrix.mc_version) || matrix.mc_version }}"
+          cp build/libs/minewordle-${MOD_VERSION}.jar minewordle-${TAG}.jar
 
       - uses: actions/upload-artifact@v4
         with:
-          name: jar-${{ matrix.mc_version }}
-          path: minewordle-${{ matrix.mc_version }}.jar
+          name: jar-${{ matrix.loader && format('{0}-{1}', matrix.loader, matrix.mc_version) || matrix.mc_version }}
+          path: minewordle-${{ matrix.loader && format('{0}-{1}', matrix.loader, matrix.mc_version) || matrix.mc_version }}.jar
 
   publish:
     needs: build
@@ -178,14 +299,23 @@ jobs:
         run: |
           publish_one() {
             local mc_version="$1"
-            local jar_file="jars/minewordle-${mc_version}.jar"
-            local upload_name="minewordle-${MOD_VERSION}+${mc_version}.jar"
-            local version_number="${MOD_VERSION}+${mc_version}"
+            local loader="${2:-fabric}"
+            local tag="$mc_version"
+            local deps='[{"project_id": "P7dR8mSH", "dependency_type": "required"}]'
+            if [ "$loader" != "fabric" ]; then
+              tag="${loader}-${mc_version}"
+              deps='[]'
+            fi
+            local jar_file="jars/minewordle-${tag}.jar"
+            local upload_name="minewordle-${MOD_VERSION}+${tag}.jar"
+            local version_number="${MOD_VERSION}+${tag}"
 
             jq -n \
-              --arg name "MineWordle ${MOD_VERSION}" \
+              --arg name "MineWordle ${MOD_VERSION} (${loader})" \
               --arg version_number "$version_number" \
               --arg mc_version "$mc_version" \
+              --arg loader "$loader" \
+              --argjson dependencies "$deps" \
               '{
                 name: $name,
                 version_number: $version_number,
@@ -193,12 +323,12 @@ jobs:
                 version_type: "release",
                 featured: true,
                 game_versions: [$mc_version],
-                loaders: ["fabric"],
+                loaders: [$loader],
                 client_side: "required",
                 server_side: "unsupported",
                 file_parts: ["file-0"],
                 primary_file: "file-0",
-                dependencies: [{project_id: "P7dR8mSH", dependency_type: "required"}],
+                dependencies: $dependencies,
                 changelog: ""
               }' > data.json
 
@@ -272,6 +402,37 @@ jobs:
           publish_one "26.1"
           publish_one "26.1.1"
           publish_one "26.1.2"
+
+          publish_one "1.20.4" "neoforge"
+          publish_one "1.20.6" "neoforge"
+          publish_one "1.21" "neoforge"
+          publish_one "1.21.1" "neoforge"
+          publish_one "1.21.2" "neoforge"
+          publish_one "1.21.3" "neoforge"
+          publish_one "1.21.4" "neoforge"
+          publish_one "1.21.5" "neoforge"
+          publish_one "1.21.6" "neoforge"
+          publish_one "1.21.7" "neoforge"
+          publish_one "1.21.8" "neoforge"
+          publish_one "1.21.9" "neoforge"
+          publish_one "1.21.10" "neoforge"
+          publish_one "1.21.11" "neoforge"
+
+          publish_one "1.20.2" "forge"
+          publish_one "1.20.3" "forge"
+          publish_one "1.20.4" "forge"
+          publish_one "1.20.6" "forge"
+          publish_one "1.21" "forge"
+          publish_one "1.21.1" "forge"
+          publish_one "1.21.3" "forge"
+          publish_one "1.21.4" "forge"
+          publish_one "1.21.5" "forge"
+          publish_one "1.21.6" "forge"
+          publish_one "1.21.7" "forge"
+          publish_one "1.21.8" "forge"
+          publish_one "1.21.9" "forge"
+          publish_one "1.21.10" "forge"
+          publish_one "1.21.11" "forge"
 
           echo "Updating project-level environment metadata..."
           PROJ_RESP=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
