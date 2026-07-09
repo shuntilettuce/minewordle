@@ -127,9 +127,12 @@ public class WordleGame {
     }
 
     private int rank(TileState s) {
-        return switch (s) {
-            case CORRECT -> 3; case PRESENT -> 2; case ABSENT -> 1; default -> 0;
-        };
+        switch (s) {
+            case CORRECT: return 3;
+            case PRESENT: return 2;
+            case ABSENT:  return 1;
+            default:      return 0;
+        }
     }
 
     public boolean      isPracticeMode()  { return practiceMode; }
