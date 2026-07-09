@@ -216,6 +216,8 @@ jobs:
             mc_version: 1.17.1
             loader: forge
             build_task: build
+            java: '16'
+            java_distribution: 'zulu'
           - branch: forge/1.18
             mc_version: 1.18
             loader: forge
@@ -325,7 +327,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.java || '21' }}
-          distribution: 'temurin'
+          distribution: ${{ matrix.java_distribution || 'temurin' }}
           cache: gradle
 
       - name: Build
