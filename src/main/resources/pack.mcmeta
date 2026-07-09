@@ -1,0 +1,10 @@
+{
+    "pack": {
+        "description": "MineWordle resources",
+        "pack_format": 46,
+        "supported_formats": {
+            "min_inclusive": 46,
+            "max_inclusive": 99
+        }
+    }
+}

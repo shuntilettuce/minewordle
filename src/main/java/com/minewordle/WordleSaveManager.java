@@ -3,7 +3,7 @@ package com.minewordle;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -17,7 +17,7 @@ public class WordleSaveManager {
     private static final WordleGame.TileState[] TS_VALS = WordleGame.TileState.values();
 
     private static Path savePath() {
-        return FabricLoader.getInstance().getGameDir().resolve(FILE_NAME);
+        return Minecraft.getInstance().gameDirectory.toPath().resolve(FILE_NAME);
     }
 
     public static void save(WordleGame game) {

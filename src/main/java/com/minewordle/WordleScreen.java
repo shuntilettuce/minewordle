@@ -2,12 +2,12 @@ package com.minewordle;
 
 import com.minewordle.WordleGame.GameState;
 import com.minewordle.WordleGame.TileState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 import org.lwjgl.glfw.GLFW;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -54,14 +54,14 @@ public class WordleScreen extends Screen {
     private int chatBtnX, chatBtnY, chatBtnW, chatBtnH;
 
     public WordleScreen(boolean practiceMode) {
-        super(Text.literal("MineWordle"));
+        super(Component.literal("MineWordle"));
         this.practiceMode = practiceMode;
 
         if (practiceMode) {
             game.startPractice();
         } else if (!WordleSaveManager.load(game)) {
             WordleFetcher.fetchTodaysSolution().thenAccept(word ->
-                MinecraftClient.getInstance().execute(() -> {
+                Minecraft.getInstance().execute(() -> {
                     if (word != null) game.setSolution(word);
                     else              game.setError();
                 })
@@ -135,8 +135,8 @@ public class WordleScreen extends Screen {
     }
 
     private void playClick(float pitch) {
-        MinecraftClient.getInstance().getSoundManager().play(
-            PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, pitch)
+        Minecraft.getInstance().getSoundManager().play(
+            SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, pitch)
         );
     }
 
@@ -144,25 +144,25 @@ public class WordleScreen extends Screen {
         var sound = guesses <= 2
             ? SoundEvents.UI_TOAST_CHALLENGE_COMPLETE
             : guesses <= 4
-                ? SoundEvents.ENTITY_PLAYER_LEVELUP
-                : SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP;
-        MinecraftClient.getInstance().getSoundManager().play(
-            PositionedSoundInstance.master(sound, 1.0f)
+                ? SoundEvents.PLAYER_LEVELUP
+                : SoundEvents.EXPERIENCE_ORB_PICKUP;
+        Minecraft.getInstance().getSoundManager().play(
+            SimpleSoundInstance.forUI(sound, 1.0f)
         );
     }
 
     // ── シェア機能 ────────────────────────────────────────────────────────────
 
     private void copyShare() {
-        MinecraftClient.getInstance().keyboard.setClipboard(buildShareText());
+        Minecraft.getInstance().keyboardHandler.setClipboard(buildShareText());
         flash("Copied!");
     }
 
     private void sendToChat() {
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
         if (client.player == null) { flash("Not in a world!"); return; }
         String header = buildShareText().split("\n")[0];
-        client.player.networkHandler.sendChatMessage(header);
+        client.player.connection.sendChat(header);
         flash("Sent to chat!");
     }
 
@@ -198,8 +198,8 @@ public class WordleScreen extends Screen {
     // ── 描画 ──────────────────────────────────────────────────────────────────
 
     @Override
-    public void render(DrawContext ctx, int mx, int my, float delta) {
-        this.renderInGameBackground(ctx);
+    public void render(GuiGraphics ctx, int mx, int my, float delta) {
+        this.renderTransparentBackground(ctx);
 
         int pw        = panelWidth();
         int panelLeft = (this.width - pw) / 2;
@@ -207,12 +207,12 @@ public class WordleScreen extends Screen {
         int panelBot  = keyboardTop() + 3 * (KEY_H + KEY_GAP) - KEY_GAP + 10;
         ctx.fill(panelLeft, panelTop, panelLeft + pw, panelBot, C_PANEL_BG);
 
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("MINEWORDLE"), this.width / 2, panelTop + 4, C_WHITE);
+        ctx.drawCenteredString(font, Component.literal("MINEWORDLE"), this.width / 2, panelTop + 4, C_WHITE);
         ctx.fill(this.width / 2 - 80, panelTop + 14, this.width / 2 + 80, panelTop + 15, C_BORDER);
 
         if (practiceMode) {
-            ctx.drawCenteredTextWithShadow(textRenderer,
-                Text.literal("- PRACTICE -"), this.width / 2, panelTop + 17, C_PRACTICE);
+            ctx.drawCenteredString(font,
+                Component.literal("- PRACTICE -"), this.width / 2, panelTop + 17, C_PRACTICE);
         }
 
         renderLoadingStatus(ctx);
@@ -224,15 +224,15 @@ public class WordleScreen extends Screen {
         super.render(ctx, mx, my, delta);
     }
 
-    private void renderLoadingStatus(DrawContext ctx) {
+    private void renderLoadingStatus(GuiGraphics ctx) {
         if (game.getGameState() == GameState.ERROR) {
-            ctx.drawCenteredTextWithShadow(textRenderer,
-                Text.literal("Failed to load — check your connection."),
+            ctx.drawCenteredString(font,
+                Component.literal("Failed to load — check your connection."),
                 this.width / 2, GRID_TOP - 4, C_RED);
         }
     }
 
-    private void renderEndOverlay(DrawContext ctx) {
+    private void renderEndOverlay(GuiGraphics ctx) {
         GameState state = game.getGameState();
         if (state != GameState.WON && state != GameState.LOST) return;
 
@@ -251,9 +251,9 @@ public class WordleScreen extends Screen {
         String chatLabel = "[ CHAT ]";
         int    color1    = won ? C_GREEN : C_RED;
 
-        int w1   = textRenderer.getWidth(line1);
-        int w2   = textRenderer.getWidth(line2);
-        int wBtn = textRenderer.getWidth(copyLabel) + 20;
+        int w1   = font.width(line1);
+        int w2   = font.width(line2);
+        int wBtn = font.width(copyLabel) + 20;
         int boxW = Math.max(Math.max(w1, w2), wBtn) + 28;
         int boxH = 68;
         int boxX = this.width  / 2 - boxW / 2;
@@ -261,8 +261,8 @@ public class WordleScreen extends Screen {
 
         ctx.fill(boxX, boxY, boxX + boxW, boxY + boxH, 0xF0101010);
         drawRect(ctx, boxX, boxY, boxW, boxH, 1, 0xFF888888);
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(line1), this.width / 2, boxY + 7,  color1);
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(line2), this.width / 2, boxY + 20, C_WHITE);
+        ctx.drawCenteredString(font, Component.literal(line1), this.width / 2, boxY + 7,  color1);
+        ctx.drawCenteredString(font, Component.literal(line2), this.width / 2, boxY + 20, C_WHITE);
 
         int btnPad = 12;
         int btnW   = boxW - btnPad * 2;
@@ -273,7 +273,7 @@ public class WordleScreen extends Screen {
         copyBtnY = boxY + 33;
         ctx.fill(copyBtnX, copyBtnY, copyBtnX + copyBtnW, copyBtnY + copyBtnH, 0xFF333333);
         drawRect(ctx, copyBtnX, copyBtnY, copyBtnW, copyBtnH, 1, 0xFF666666);
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(copyLabel),
+        ctx.drawCenteredString(font, Component.literal(copyLabel),
                 this.width / 2, copyBtnY + 3, C_WHITE);
 
         chatBtnW = btnW; chatBtnH = btnH;
@@ -281,11 +281,11 @@ public class WordleScreen extends Screen {
         chatBtnY = copyBtnY + btnH + 3;
         ctx.fill(chatBtnX, chatBtnY, chatBtnX + chatBtnW, chatBtnY + chatBtnH, 0xFF333333);
         drawRect(ctx, chatBtnX, chatBtnY, chatBtnW, chatBtnH, 1, 0xFF666666);
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(chatLabel),
+        ctx.drawCenteredString(font, Component.literal(chatLabel),
                 this.width / 2, chatBtnY + 3, C_WHITE);
     }
 
-    private void renderGrid(DrawContext ctx) {
+    private void renderGrid(GuiGraphics ctx) {
         int left       = gridLeft();
         String[] guesses  = game.getGuesses();
         TileState[][] eval = game.getEvaluated();
@@ -323,7 +323,7 @@ public class WordleScreen extends Screen {
         }
     }
 
-    private void renderKeyboard(DrawContext ctx) {
+    private void renderKeyboard(GuiGraphics ctx) {
         TileState[] ks  = game.getKeyStates();
         int         top = keyboardTop();
 
@@ -345,21 +345,21 @@ public class WordleScreen extends Screen {
                 }
                 ctx.fill(x, y, x + kw, y + KEY_H, bg);
                 ctx.fill(x, y + KEY_H - 3, x + kw, y + KEY_H, darken(bg));
-                int lw = textRenderer.getWidth(key);
-                ctx.drawText(textRenderer, key, x + kw / 2 - lw / 2, y + KEY_H / 2 - 4, C_WHITE, false);
+                int lw = font.width(key);
+                ctx.drawString(font, key, x + kw / 2 - lw / 2, y + KEY_H / 2 - 4, C_WHITE, false);
                 x += kw + KEY_GAP;
             }
         }
     }
 
-    private void renderFlash(DrawContext ctx) {
+    private void renderFlash(GuiGraphics ctx) {
         if (flashTimer <= 0) return;
         flashTimer--;
-        int fw = textRenderer.getWidth(flashMsg);
+        int fw = font.width(flashMsg);
         int fx = this.width / 2 - fw / 2;
         int fy = GRID_TOP - 14;
         ctx.fill(fx - 6, fy - 2, fx + fw + 6, fy + 12, C_WHITE);
-        ctx.drawText(textRenderer, flashMsg, fx, fy + 1, 0xFF000000, false);
+        ctx.drawString(font, flashMsg, fx, fy + 1, 0xFF000000, false);
     }
 
     private boolean isWide(String key) {
@@ -368,23 +368,23 @@ public class WordleScreen extends Screen {
 
     // ── 描画ユーティリティ ────────────────────────────────────────────────────
 
-    private void drawRect(DrawContext ctx, int x, int y, int w, int h, int t, int color) {
+    private void drawRect(GuiGraphics ctx, int x, int y, int w, int h, int t, int color) {
         ctx.fill(x,         y,         x + w,     y + t,     color);
         ctx.fill(x,         y + h - t, x + w,     y + h,     color);
         ctx.fill(x,         y,         x + t,     y + h,     color);
         ctx.fill(x + w - t, y,         x + w,     y + h,     color);
     }
 
-    private void drawCentered(DrawContext ctx, String text, int cx, int cy, int color) {
-        int tw = textRenderer.getWidth(text);
-        ctx.drawText(textRenderer, text, cx - tw / 2, cy - 4, color, false);
+    private void drawCentered(GuiGraphics ctx, String text, int cx, int cy, int color) {
+        int tw = font.width(text);
+        ctx.drawString(font, text, cx - tw / 2, cy - 4, color, false);
     }
 
     // ── 入力 ─────────────────────────────────────────────────────────────────
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) { this.close(); return true; }
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) { this.onClose(); return true; }
         if (game.getGameState() != GameState.PLAYING) return super.keyPressed(keyCode, scanCode, modifiers);
         if (keyCode == GLFW.GLFW_KEY_BACKSPACE) { game.removeLetter(); playClick(0.9f); return true; }
         if (keyCode == GLFW.GLFW_KEY_ENTER)     { handleSubmit(); return true; }
@@ -437,5 +437,5 @@ public class WordleScreen extends Screen {
     }
 
     @Override
-    public boolean shouldPause() { return false; }
+    public boolean isPauseScreen() { return false; }
 }
