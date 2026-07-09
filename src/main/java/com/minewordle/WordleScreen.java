@@ -5,6 +5,9 @@ import com.minewordle.WordleGame.TileState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -383,19 +386,21 @@ public class WordleScreen extends Screen {
     // ── 入力 ─────────────────────────────────────────────────────────────────
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
+        int keyCode = event.key();
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) { this.onClose(); return true; }
-        if (game.getGameState() != GameState.PLAYING) return super.keyPressed(keyCode, scanCode, modifiers);
+        if (game.getGameState() != GameState.PLAYING) return super.keyPressed(event);
         if (keyCode == GLFW.GLFW_KEY_BACKSPACE) { game.removeLetter(); playClick(0.9f); return true; }
         if (keyCode == GLFW.GLFW_KEY_ENTER)     { handleSubmit(); return true; }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
+    public boolean charTyped(CharacterEvent event) {
         if (game.getGameState() != GameState.PLAYING) return false;
-        if (Character.isLetter(chr)) {
-            game.addLetter(chr);
+        int codepoint = event.codepoint();
+        if (Character.isLetter(codepoint)) {
+            game.addLetter((char) codepoint);
             playClick(0.9f + (float) Math.random() * 0.2f);
             return true;
         }
@@ -419,7 +424,10 @@ public class WordleScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int    button = event.button();
         GameState state = game.getGameState();
         if ((state == GameState.WON || state == GameState.LOST) && button == 0) {
             if (mouseX >= copyBtnX && mouseX <= copyBtnX + copyBtnW
@@ -433,7 +441,7 @@ public class WordleScreen extends Screen {
                 return true;
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
