@@ -162,7 +162,7 @@ public class WordleScreen extends Screen {
         Minecraft client = Minecraft.getInstance();
         if (client.player == null) { flash("Not in a world!"); return; }
         String header = buildShareText().split("\n")[0];
-        client.player.chat(header);
+        client.player.chatSigned(header, Component.literal(header));
         flash("Sent to chat!");
     }
 
