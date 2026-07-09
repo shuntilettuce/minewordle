@@ -13,13 +13,13 @@ authors = "shunti"
 [[dependencies.minewordle]]
     modId = "forge"
     type = "required"
-    versionRange = "[40,)"
+    versionRange = "[39,)"
     ordering = "NONE"
     side = "CLIENT"
 
 [[dependencies.minewordle]]
     modId = "minecraft"
     type = "required"
-    versionRange = "[1.18.2,1.19)"
+    versionRange = "[1.18.1,1.18.2)"
     ordering = "NONE"
     side = "CLIENT"
