@@ -1,6 +1,5 @@
 plugins {
-    id 'java-library'
-    id 'net.neoforged.moddev' version '2.0.141'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
     id 'com.modrinth.minotaur' version '2.+'
 }
 
@@ -9,10 +8,6 @@ group = project.maven_group
 
 base {
     archivesName = project.archives_base_name
-}
-
-repositories {
-    mavenCentral()
 }
 
 java {
@@ -24,26 +19,35 @@ java {
     withSourcesJar()
 }
 
-neoForge {
-    version = project.neoforge_version
-
-    mods {
-        minewordle {
-            sourceSet sourceSets.main
-        }
-    }
+minecraft {
+    mappings channel: 'official', version: project.minecraft_version
 
     runs {
         client {
-            client()
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                minewordle {
+                    source sourceSets.main
+                }
+            }
         }
     }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${project.forge_version}"
 }
 
 processResources {
     inputs.property "version", project.version
     filteringCharset "UTF-8"
-    filesMatching("META-INF/neoforge.mods.toml") {
+    filesMatching("META-INF/mods.toml") {
         expand "version": project.version
     }
 }
@@ -56,9 +60,8 @@ modrinth {
     versionType = "release"
     uploadFile = jar
     gameVersions = ["${project.minecraft_version}"]
-    loaders = ["neoforge"]
+    loaders = ["forge"]
     changelog = ""
     dependencies {
-        required.project "neoforge"
     }
 }

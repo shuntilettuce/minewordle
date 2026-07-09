@@ -11,9 +11,9 @@ description = "Play Wordle inside Minecraft! Use /wordle command to open the gam
 authors = "shunti"
 
 [[dependencies.minewordle]]
-    modId = "neoforge"
+    modId = "forge"
     type = "required"
-    versionRange = "[21.4,)"
+    versionRange = "[54,)"
     ordering = "NONE"
     side = "CLIENT"
 

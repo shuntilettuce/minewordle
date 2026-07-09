@@ -3,17 +3,17 @@ package com.minewordle;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
-import net.neoforged.neoforge.common.NeoForge;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 @Mod("minewordle")
 public class MineWordleMod {
 
     public MineWordleMod(IEventBus modBus) {
-        NeoForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     @SubscribeEvent
