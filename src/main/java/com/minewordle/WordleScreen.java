@@ -6,8 +6,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.network.chat.TextComponent;
 import org.lwjgl.glfw.GLFW;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -54,7 +54,7 @@ public class WordleScreen extends Screen {
     private int chatBtnX, chatBtnY, chatBtnW, chatBtnH;
 
     public WordleScreen(boolean practiceMode) {
-        super(new TextComponent("MineWordle"));
+        super(Component.literal("MineWordle"));
         this.practiceMode = practiceMode;
 
         if (practiceMode) {
