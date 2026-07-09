@@ -2,12 +2,12 @@ package com.minewordle;
 
 import com.minewordle.WordleGame.GameState;
 import com.minewordle.WordleGame.TileState;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.chat.TextComponent;
 import org.lwjgl.glfw.GLFW;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -54,7 +54,7 @@ public class WordleScreen extends Screen {
     private int chatBtnX, chatBtnY, chatBtnW, chatBtnH;
 
     public WordleScreen(boolean practiceMode) {
-        super(new StringTextComponent("MineWordle"));
+        super(new TextComponent("MineWordle"));
         this.practiceMode = practiceMode;
 
         if (practiceMode) {
@@ -136,18 +136,18 @@ public class WordleScreen extends Screen {
 
     private void playClick(float pitch) {
         Minecraft.getInstance().getSoundManager().play(
-            SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, pitch)
+            SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, pitch)
         );
     }
 
     private void playWinSound(int guesses) {
-        net.minecraft.util.SoundEvent sound = guesses <= 2
+        net.minecraft.sounds.SoundEvent sound = guesses <= 2
             ? SoundEvents.UI_TOAST_CHALLENGE_COMPLETE
             : guesses <= 4
                 ? SoundEvents.PLAYER_LEVELUP
                 : SoundEvents.EXPERIENCE_ORB_PICKUP;
         Minecraft.getInstance().getSoundManager().play(
-            SimpleSound.forUI(sound, 1.0f)
+            SimpleSoundInstance.forUI(sound, 1.0f)
         );
     }
 
@@ -198,7 +198,7 @@ public class WordleScreen extends Screen {
     // ── 描画 ──────────────────────────────────────────────────────────────────
 
     @Override
-    public void render(MatrixStack ms, int mx, int my, float delta) {
+    public void render(PoseStack ms, int mx, int my, float delta) {
         this.renderBackground(ms);
 
         int pw        = panelWidth();
@@ -223,7 +223,7 @@ public class WordleScreen extends Screen {
         super.render(ms, mx, my, delta);
     }
 
-    private void renderLoadingStatus(MatrixStack ms) {
+    private void renderLoadingStatus(PoseStack ms) {
         if (game.getGameState() == GameState.ERROR) {
             drawCenteredString(ms, font,
                 "Failed to load — check your connection.",
@@ -231,7 +231,7 @@ public class WordleScreen extends Screen {
         }
     }
 
-    private void renderEndOverlay(MatrixStack ms) {
+    private void renderEndOverlay(PoseStack ms) {
         GameState state = game.getGameState();
         if (state != GameState.WON && state != GameState.LOST) return;
 
@@ -287,7 +287,7 @@ public class WordleScreen extends Screen {
         drawCenteredString(ms, font, chatLabel, this.width / 2, chatBtnY + 3, C_WHITE);
     }
 
-    private void renderGrid(MatrixStack ms) {
+    private void renderGrid(PoseStack ms) {
         int left       = gridLeft();
         String[] guesses  = game.getGuesses();
         TileState[][] eval = game.getEvaluated();
@@ -325,7 +325,7 @@ public class WordleScreen extends Screen {
         }
     }
 
-    private void renderKeyboard(MatrixStack ms) {
+    private void renderKeyboard(PoseStack ms) {
         TileState[] ks  = game.getKeyStates();
         int         top = keyboardTop();
 
@@ -354,7 +354,7 @@ public class WordleScreen extends Screen {
         }
     }
 
-    private void renderFlash(MatrixStack ms) {
+    private void renderFlash(PoseStack ms) {
         if (flashTimer <= 0) return;
         flashTimer--;
         int fw = font.width(flashMsg);
@@ -370,14 +370,14 @@ public class WordleScreen extends Screen {
 
     // ── 描画ユーティリティ ────────────────────────────────────────────────────
 
-    private void drawRect(MatrixStack ms, int x, int y, int w, int h, int t, int color) {
+    private void drawRect(PoseStack ms, int x, int y, int w, int h, int t, int color) {
         fill(ms, x,         y,         x + w,     y + t,     color);
         fill(ms, x,         y + h - t, x + w,     y + h,     color);
         fill(ms, x,         y,         x + t,     y + h,     color);
         fill(ms, x + w - t, y,         x + w,     y + h,     color);
     }
 
-    private void drawCentered(MatrixStack ms, String text, int cx, int cy, int color) {
+    private void drawCentered(PoseStack ms, String text, int cx, int cy, int color) {
         int tw = font.width(text);
         font.draw(ms, text, cx - tw / 2, cy - 4, color);
     }
