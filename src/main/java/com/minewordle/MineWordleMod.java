@@ -5,14 +5,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod("minewordle")
 public class MineWordleMod {
 
-    public MineWordleMod(IEventBus modBus) {
+    public MineWordleMod() {
         MinecraftForge.EVENT_BUS.register(this);
     }
 
