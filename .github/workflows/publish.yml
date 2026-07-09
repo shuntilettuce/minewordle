@@ -180,6 +180,82 @@ jobs:
             build_task: build
 
           # Forge
+          - branch: forge/1.15
+            mc_version: "1.15"
+            loader: forge
+            build_task: build
+          - branch: forge/1.15.1
+            mc_version: 1.15.1
+            loader: forge
+            build_task: build
+          - branch: forge/1.15.2
+            mc_version: 1.15.2
+            loader: forge
+            build_task: build
+          - branch: forge/1.16.1
+            mc_version: 1.16.1
+            loader: forge
+            build_task: build
+          - branch: forge/1.16.2
+            mc_version: 1.16.2
+            loader: forge
+            build_task: build
+          - branch: forge/1.16.3
+            mc_version: 1.16.3
+            loader: forge
+            build_task: build
+          - branch: forge/1.16.4
+            mc_version: 1.16.4
+            loader: forge
+            build_task: build
+          - branch: forge/1.16.5
+            mc_version: 1.16.5
+            loader: forge
+            build_task: build
+          - branch: forge/1.17.1
+            mc_version: 1.17.1
+            loader: forge
+            build_task: build
+          - branch: forge/1.18
+            mc_version: 1.18
+            loader: forge
+            build_task: build
+          - branch: forge/1.18.1
+            mc_version: 1.18.1
+            loader: forge
+            build_task: build
+          - branch: forge/1.18.2
+            mc_version: 1.18.2
+            loader: forge
+            build_task: build
+          - branch: forge/1.19
+            mc_version: 1.19
+            loader: forge
+            build_task: build
+          - branch: forge/1.19.1
+            mc_version: 1.19.1
+            loader: forge
+            build_task: build
+          - branch: forge/1.19.2
+            mc_version: 1.19.2
+            loader: forge
+            build_task: build
+          - branch: forge/1.19.3
+            mc_version: 1.19.3
+            loader: forge
+            build_task: build
+          - branch: forge/1.19.4
+            mc_version: 1.19.4
+            loader: forge
+            build_task: build
+          - branch: forge/1.20
+            mc_version: "1.20"
+            loader: forge
+            build_task: build
+          - branch: forge/1.20.1
+            mc_version: 1.20.1
+            loader: forge
+            build_task: build
           - branch: forge/1.20.2
             mc_version: 1.20.2
             loader: forge
@@ -418,6 +494,25 @@ jobs:
           publish_one "1.21.10" "neoforge"
           publish_one "1.21.11" "neoforge"
 
+          publish_one "1.15" "forge"
+          publish_one "1.15.1" "forge"
+          publish_one "1.15.2" "forge"
+          publish_one "1.16.1" "forge"
+          publish_one "1.16.2" "forge"
+          publish_one "1.16.3" "forge"
+          publish_one "1.16.4" "forge"
+          publish_one "1.16.5" "forge"
+          publish_one "1.17.1" "forge"
+          publish_one "1.18" "forge"
+          publish_one "1.18.1" "forge"
+          publish_one "1.18.2" "forge"
+          publish_one "1.19" "forge"
+          publish_one "1.19.1" "forge"
+          publish_one "1.19.2" "forge"
+          publish_one "1.19.3" "forge"
+          publish_one "1.19.4" "forge"
+          publish_one "1.20" "forge"
+          publish_one "1.20.1" "forge"
           publish_one "1.20.2" "forge"
           publish_one "1.20.3" "forge"
           publish_one "1.20.4" "forge"
