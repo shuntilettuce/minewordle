@@ -8,9 +8,15 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.TickEvent;
 
 @Mod("minewordle")
 public class MineWordleMod {
+
+    // /wordle runs synchronously inside ChatScreen's key handler, before the
+    // chat screen closes itself — opening WordleScreen immediately would race
+    // with (and lose to) that close. Defer to the next client tick instead.
+    private static volatile Boolean pendingOpen = null;
 
     public MineWordleMod(IEventBus modBus) {
         NeoForge.EVENT_BUS.register(this);
@@ -20,19 +26,27 @@ public class MineWordleMod {
     public void onRegisterClientCommands(RegisterClientCommandsEvent event) {
         event.getDispatcher().register(
             LiteralArgumentBuilder.<CommandSourceStack>literal("wordle")
-                .executes(ctx -> openScreen(false))
+                .executes(ctx -> requestOpen(false))
                 .then(LiteralArgumentBuilder.<CommandSourceStack>literal("practice")
-                    .executes(ctx -> openScreen(true)))
+                    .executes(ctx -> requestOpen(true)))
         );
     }
 
-    private static int openScreen(boolean practiceMode) {
+    @SubscribeEvent
+    public void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+        if (pendingOpen == null) return;
+        boolean practiceMode = pendingOpen;
+        pendingOpen = null;
+
         Minecraft client = Minecraft.getInstance();
-        client.execute(() -> {
-            if (client.screen == null) {
-                client.setScreen(new WordleScreen(practiceMode));
-            }
-        });
+        if (!(client.screen instanceof WordleScreen)) {
+            client.setScreen(new WordleScreen(practiceMode));
+        }
+    }
+
+    private static int requestOpen(boolean practiceMode) {
+        pendingOpen = practiceMode;
         return 1;
     }
 }
