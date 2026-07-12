@@ -1,9 +1,10 @@
 package com.minewordle;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.minecraft.client.Minecraft;
 
 public class MineWordleMod implements ClientModInitializer {
 
@@ -15,9 +16,9 @@ public class MineWordleMod implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
-            dispatcher.register(ClientCommandManager.literal("wordle")
+            dispatcher.register(ClientCommands.literal("wordle")
                 .executes(ctx -> requestOpen(false))
-                .then(ClientCommandManager.literal("practice")
+                .then(ClientCommands.literal("practice")
                     .executes(ctx -> requestOpen(true)))
             )
         );
@@ -27,7 +28,7 @@ public class MineWordleMod implements ClientModInitializer {
             boolean practiceMode = pendingOpen;
             pendingOpen = null;
 
-            if (!(client.currentScreen instanceof WordleScreen)) {
+            if (!(client.screen instanceof WordleScreen)) {
                 client.setScreen(new WordleScreen(practiceMode));
             }
         });
